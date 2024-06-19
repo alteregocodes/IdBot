@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG
@@ -48,6 +49,27 @@ async def update(client, message: Message):
 async def get_user_id(client, message: Message):
     user_id = message.from_user.id
     await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
+
+# Handler untuk perintah carbon
+@app.on_message(filters.command("carbon") & filters.private)
+async def carbon(client, message: Message):
+    if not message.reply_to_message or not message.reply_to_message.text:
+        await message.reply_text("Balas pesan dengan teks kode untuk membuat gambar Carbon.")
+        return
+    
+    code = message.reply_to_message.text
+    response = requests.post(
+        "https://carbonara.vercel.app/api/cook",
+        json={"code": code}
+    )
+    
+    if response.status_code == 200:
+        with open("carbon.png", "wb") as f:
+            f.write(response.content)
+        await client.send_photo(message.chat.id, "carbon.png")
+        os.remove("carbon.png")
+    else:
+        await message.reply_text("Gagal membuat gambar Carbon. Coba lagi nanti.")
 
 if __name__ == "__main__":
     app.run()
