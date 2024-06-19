@@ -1,10 +1,8 @@
 # module/__init__.py
 
-from pyrogram import Client
-
+from .carbon import carbon
 from .update import update
 from .start import start
-from .carbon import carbon
 from .getid import get_id
 from .help import help_command, help_update, help_start, help_carbon, help_getid
 
