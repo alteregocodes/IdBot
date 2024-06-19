@@ -4,7 +4,7 @@ import os
 import sys
 import subprocess
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, START_MSG
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -12,7 +12,14 @@ app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_T
 # Handler untuk memulai bot
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
-    await message.reply_text(START_MSG)
+    buttons = [
+        [InlineKeyboardButton("Developer", url="https://t.me/SayaKyu")],
+        [
+            InlineKeyboardButton("Support Channel", url="https://t.me/Alteregonetwork"),
+            InlineKeyboardButton("Support Group", url="https://t.me/Alterego_ID")
+        ]
+    ]
+    await message.reply_text(START_MSG, reply_markup=InlineKeyboardMarkup(buttons))
 
 # Handler untuk pesan diteruskan
 @app.on_message(filters.forwarded)
@@ -35,11 +42,11 @@ async def update(client, message: Message):
     # Jalankan ulang bot
     os.execv(sys.executable, ['python'] + sys.argv)
 
+# Handler untuk mendapatkan ID pengguna
 @app.on_message(filters.command("id") & filters.private)
 async def get_user_id(client, message: Message):
     user_id = message.from_user.id
-    await message.reply_text(f"ID Anda adalah: <code> {user_id} </code>")
-
+    await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
 
 if __name__ == "__main__":
     app.run()
