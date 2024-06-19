@@ -1,11 +1,13 @@
 # module/carbon.py
 
+import requests
 import aiohttp
 import asyncio
 from io import BytesIO
-from pyrogram import filters
 from pyrogram.types import Message
+from pyrogram import Client, filters
 
+# Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
 
 async def init_aiosession():
@@ -21,7 +23,7 @@ async def make_carbon(code):
     image.name = "carbon.png"
     return image
 
-async def carbon_func(client, message: Message):
+async def carbon(client: Client, message: Message):
     text = (
         message.text.split(None, 1)[1]
         if len(message.command) != 1
@@ -43,6 +45,3 @@ async def carbon_func(client, message: Message):
         ),
     )
     carbon.close()
-
-def init(app):
-    app.on_message(filters.command("carbon") & filters.private)(carbon_func)
