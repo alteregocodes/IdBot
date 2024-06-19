@@ -35,5 +35,11 @@ async def update(client, message: Message):
     # Jalankan ulang bot
     os.execv(sys.executable, ['python'] + sys.argv)
 
+@app.on_message(filters.command("id") & filters.private)
+async def get_user_id(client, message: Message):
+    user_id = message.from_user.id
+    await message.reply_text(f"ID Anda adalah: {user_id}")
+
+
 if __name__ == "__main__":
     app.run()
