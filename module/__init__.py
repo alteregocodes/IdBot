@@ -1,14 +1,20 @@
 # module/__init__.py
 
-from .start import *
-from .update import *
-from .carbon import *
-from .getid import *
-from .help import *
+from pyrogram import Client
 
-def init(app):
-    start.init(app)
-    update.init(app)
-    carbon_func.init(app)
-    get_user_id.init(app)
-    help.init(app)
+from .update import update
+from .start import start
+from .carbon import carbon
+from .getid import get_id
+from .help import help_command, help_update, help_start, help_carbon, help_getid
+
+def initialize_handlers(client: Client):
+    client.add_handler(update, prefix='update')
+    client.add_handler(start, prefix='start')
+    client.add_handler(carbon, prefix='carbon')
+    client.add_handler(get_id, prefix='getid')
+    client.add_handler(help_command, prefix='help')
+    client.add_handler(help_update, prefix='help_update')
+    client.add_handler(help_start, prefix='help_start')
+    client.add_handler(help_carbon, prefix='help_carbon')
+    client.add_handler(help_getid, prefix='help_getid')
