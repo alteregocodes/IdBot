@@ -53,6 +53,8 @@ async def get_forwarded_info(client, message: Message):
 @app.on_message(filters.command("update") & filters.user(OWNER_IDS))
 async def update(client, message: Message):
     await message.reply_text("Bot akan memperbarui dan memulai ulang...")
+    # Hentikan bot
+    await app.stop()
     # Lakukan git pull dan simpan hasilnya ke file log sementara
     result = subprocess.run(["git", "pull"], capture_output=True, text=True)
     with open(UPDATE_LOG_FILE, "w") as f:
