@@ -127,5 +127,51 @@ def close_aiohttp_session():
     if aiosession:
         asyncio.run(aiosession.close())
 
+
+
+# Daftar modul dan keterangannya
+MODUL_DESC = {
+    "carbon": "Mengubah kode menjadi gambar dengan /carbon <kode>.",
+    "update": "Memperbarui bot dengan /update (Hanya untuk pemilik bot).",
+    "id": "Mendapatkan ID pengguna dan grup dengan /id.",
+}
+
+# Fungsi untuk menampilkan daftar modul
+async def show_modules(client, message_or_callback):
+    buttons = [
+        [InlineKeyboardButton(name, callback_data=f"mod_{name}") for name in MODUL_DESC]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    text = "Berikut adalah beberapa fitur yang tersedia:"
+    if isinstance(message_or_callback, Message):
+        await message_or_callback.reply_text(text, reply_markup=reply_markup)
+    elif isinstance(message_or_callback, CallbackQuery):
+        await message_or_callback.message.edit(text, reply_markup=reply_markup)
+
+# Handler untuk perintah /help
+@app.on_message(filters.command("help") & filters.private)
+async def help_command(client, message: Message):
+    await show_modules(client, message)
+
+# Handler untuk tombol modul
+@app.on_callback_query(filters.regex(r"^mod_"))
+async def module_callback(client, callback_query: CallbackQuery):
+    mod_name = callback_query.data.split("_")[1]
+    mod_desc = MODUL_DESC.get(mod_name, "Modul tidak ditemukan.")
+    
+    buttons = [[InlineKeyboardButton("Kembali", callback_data="back_to_help")]]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    
+    await callback_query.message.edit_text(mod_desc, reply_markup=reply_markup)
+
+# Handler untuk tombol Kembali
+@app.on_callback_query(filters.regex(r"^back_to_help$"))
+async def back_to_help_callback(client, callback_query: CallbackQuery):
+    await show_modules(client, callback_query)
+
+if __name__ == "__main__":
+    app.run()
+
+
 if __name__ == "__main__":
     app.run()
