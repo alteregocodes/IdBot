@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
@@ -56,10 +57,14 @@ async def update(client, message: Message):
     os.execv(sys.executable, ['python'] + sys.argv)
 
 # Handler untuk mendapatkan ID pengguna
-@app.on_message(filters.command("id") & filters.private)
+@app.on_message(filters.command("id"))
 async def get_user_id(client, message: Message):
     user_id = message.from_user.id
-    await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
+    if message.chat.type in ["group", "supergroup"]:
+        chat_id = message.chat.id
+        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>")
+    else:
+        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
 
 # Handler untuk perintah carbon
 @app.on_message(filters.command("carbon") & filters.private)
