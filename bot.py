@@ -16,7 +16,7 @@ async def start(client, message: Message):
 async def get_forwarded_info(client, message: Message):
     if message.forward_from_chat:
         chat_id = message.forward_from_chat.id
-        chat_id_formatted = f"-100{abs(chat_id)}" if chat_id < 0 else str(chat_id)
+        chat_id_formatted = f"<code> {abs(chat_id)} </code>" if chat_id < 0 else str(chat_id)
         await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}")
     else:
         await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
