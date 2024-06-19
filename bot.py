@@ -38,7 +38,7 @@ async def update(client, message: Message):
 @app.on_message(filters.command("id") & filters.private)
 async def get_user_id(client, message: Message):
     user_id = message.from_user.id
-    await message.reply_text(f"ID Anda adalah: {user_id}")
+    await message.reply_text(f"ID Anda adalah: <code> {user_id} </code>")
 
 
 if __name__ == "__main__":
