@@ -19,7 +19,10 @@ async def start(client, message: Message):
             update_log = f.read()
         # Kirim log pembaruan ke semua owner
         for owner_id in OWNER_IDS:
-            await client.send_message(owner_id, f"Bot telah berhasil diperbarui:\n\n{update_log}")
+            try:
+                await client.send_message(owner_id, f"Bot telah berhasil diperbarui:\n\n{update_log}")
+            except Exception as e:
+                print(f"Failed to send message to {owner_id}: {e}")
         # Hapus file log setelah dikirim
         os.remove(UPDATE_LOG_FILE)
     
