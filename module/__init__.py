@@ -1,9 +1,9 @@
 # module/__init__.py
 
-from .carbon import carbon
-from .update import update
-from .start import start
-from .getid import get_id
+from .carbon import *
+from .update import *
+from .start import *
+from .getid import *
 from .help import help_command, help_update, help_start, help_carbon, help_getid
 
 def initialize_handlers(client: Client):
