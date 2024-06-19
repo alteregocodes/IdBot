@@ -3,16 +3,25 @@
 import os
 import sys
 import subprocess
-import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG
+from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Handler untuk memulai bot
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
+    # Periksa apakah ada file log pembaruan
+    if os.path.exists(UPDATE_LOG_FILE):
+        with open(UPDATE_LOG_FILE, "r") as f:
+            update_log = f.read()
+        # Kirim log pembaruan ke semua owner
+        for owner_id in OWNER_IDS:
+            await client.send_message(owner_id, f"Bot telah berhasil diperbarui:\n\n{update_log}")
+        # Hapus file log setelah dikirim
+        os.remove(UPDATE_LOG_FILE)
+    
     buttons = [
         [InlineKeyboardButton("Developer", url="https://t.me/SayaKyu")],
         [
@@ -39,8 +48,10 @@ async def update(client, message: Message):
     await message.reply_text("Bot akan memperbarui dan memulai ulang...")
     # Hentikan bot
     app.stop()
-    # Lakukan git pull
-    subprocess.run(["git", "pull"])
+    # Lakukan git pull dan simpan hasilnya ke file log sementara
+    result = subprocess.run(["git", "pull"], capture_output=True, text=True)
+    with open(UPDATE_LOG_FILE, "w") as f:
+        f.write(result.stdout)
     # Jalankan ulang bot
     os.execv(sys.executable, ['python'] + sys.argv)
 
