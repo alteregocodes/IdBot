@@ -1,30 +1,31 @@
 # module/help.py
 
-from pyrogram import filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-from config import HELP_MSG
+from pyrogram.types import Message
+from pyrogram import Client, InlineKeyboardButton, InlineKeyboardMarkup
+from module import update, start, carbon, getid
 
-async def help(client, message: Message):
+async def help_command(client: Client, message: Message):
     buttons = [
-        [InlineKeyboardButton("Start", callback_data="help_start")],
-        [InlineKeyboardButton("Update", callback_data="help_update")],
-        [InlineKeyboardButton("Carbon", callback_data="help_carbon")],
-        [InlineKeyboardButton("Get ID", callback_data="help_getid")],
+        [
+            InlineKeyboardButton("Update", callback_data="help_update"),
+            InlineKeyboardButton("Start", callback_data="help_start"),
+            InlineKeyboardButton("Carbon", callback_data="help_carbon"),
+        ],
+        [
+            InlineKeyboardButton("Get ID", callback_data="help_getid"),
+        ]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply_text(HELP_MSG, reply_markup=reply_markup)
+    await message.reply_text("Pilih modul untuk melihat keterangan perintah:", reply_markup=reply_markup)
 
-async def help_callback(client, callback_query):
-    data = callback_query.data
-    if data == "help_start":
-        await callback_query.message.edit_text("Perintah /start digunakan untuk memulai bot.")
-    elif data == "help_update":
-        await callback_query.message.edit_text("Perintah /update digunakan untuk memperbarui bot. Hanya dapat digunakan oleh owner.")
-    elif data == "help_carbon":
-        await callback_query.message.edit_text("Perintah /carbon digunakan untuk membuat gambar kode. Gunakan dengan membalas pesan berisi kode.")
-    elif data == "help_getid":
-        await callback_query.message.edit_text("Perintah /id digunakan untuk mendapatkan ID pengguna atau grup.")
+async def help_update(client: Client, message: Message):
+    await message.reply_text("ℹ️ Update:\n\nPerintah untuk memperbarui dan memulai ulang bot.", disable_web_page_preview=True)
 
-def init(app):
-    app.on_message(filters.command("help") & filters.private)(help)
-    app.on_callback_query(filters.create(lambda _, __, query: query.data.startswith("help_")))(help_callback)
+async def help_start(client: Client, message: Message):
+    await message.reply_text("ℹ️ Start:\n\nPerintah untuk memulai bot dengan tombol Developer, Support Channel, dan Support Grup.", disable_web_page_preview=True)
+
+async def help_carbon(client: Client, message: Message):
+    await message.reply_text("ℹ️ Carbon:\n\nBalas pesan dengan kode untuk membuat gambar Carbon dari kode tersebut.", disable_web_page_preview=True)
+
+async def help_getid(client: Client, message: Message):
+    await message.reply_text("ℹ️ Get ID:\n\nPerintah untuk mendapatkan ID Anda atau ID grup/channel dari pesan yang diteruskan.", disable_web_page_preview=True)
