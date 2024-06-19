@@ -2,7 +2,7 @@
 
 class Config:
     # Data bot
-    BOT_TOKEN = 7429042824:AAG_4iwiO15vYqOCxr9Cn9ygnAG-1vNSzys
+    BOT_TOKEN = '7429042824:AAG_4iwiO15vYqOCxr9Cn9ygnAG-1vNSzys'
     
     # Data owner
     OWNER_ID = 6109394253  # Ganti dengan ID Telegram Anda
