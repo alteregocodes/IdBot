@@ -4,12 +4,54 @@ import os
 import sys
 import subprocess
 import requests
+import aiohttp
+import asyncio
+from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+
+# Inisialisasi sesi aiohttp.ClientSession
+aiosession = None
+
+async def init_aiosession():
+    global aiosession
+    if aiosession is None:
+        aiosession = aiohttp.ClientSession()
+
+async def make_carbon(code):
+    await init_aiosession()
+    url = "https://carbonara.solopov.dev/api/cook"
+    async with aiosession.post(url, json={"code": code}) as resp:
+        image = BytesIO(await resp.read())
+    image.name = "carbon.png"
+    return image
+
+async def carbon_func(client, message):
+    text = (
+        message.text.split(None, 1)[1]
+        if len(message.command) != 1
+        else None
+    )
+    if message.reply_to_message:
+        text = message.reply_to_message.text or message.reply_to_message.caption
+    if not text:
+        return await message.delete()
+    ex = await message.reply("⚙️ Memproses . . .")
+    carbon = await make_carbon(text)
+    await ex.edit("🔼 Mengunggah . . .")
+    await asyncio.gather(
+        ex.delete(),
+        client.send_photo(
+            message.chat.id,
+            carbon,
+            caption=f"<b>Carbonised by:</b> {client.me.mention}",
+        ),
+    )
+    carbon.close()
 
 # Handler untuk memulai bot
 @app.on_message(filters.command("start") & filters.private)
@@ -75,23 +117,15 @@ async def get_user_id(client, message: Message):
 # Handler untuk perintah carbon
 @app.on_message(filters.command("carbon") & filters.private)
 async def carbon(client, message: Message):
-    if not message.reply_to_message or not message.reply_to_message.text:
-        await message.reply_text("Balas pesan dengan teks kode untuk membuat gambar Carbon.")
-        return
-    
-    code = message.reply_to_message.text
-    response = requests.post(
-        "https://carbonara.vercel.app/api/cook",
-        json={"code": code}
-    )
-    
-    if response.status_code == 200:
-        with open("carbon.png", "wb") as f:
-            f.write(response.content)
-        await client.send_photo(message.chat.id, "carbon.png")
-        os.remove("carbon.png")
-    else:
-        await message.reply_text("Gagal membuat gambar Carbon. Coba lagi nanti.")
+    await carbon_func(client, message)
+
+# Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
+import atexit
+
+@atexit.register
+def close_aiohttp_session():
+    if aiosession:
+        asyncio.run(aiosession.close())
 
 if __name__ == "__main__":
     app.run()
