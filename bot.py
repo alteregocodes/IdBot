@@ -4,8 +4,8 @@ import os
 import sys
 import subprocess
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from config import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, START_MSG
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -16,10 +16,11 @@ async def start(client, message: Message):
         [InlineKeyboardButton("Developer", url="https://t.me/SayaKyu")],
         [
             InlineKeyboardButton("Support Channel", url="https://t.me/Alteregonetwork"),
-            InlineKeyboardButton("Support Group", url="https://t.me/Alterego_ID")
+            InlineKeyboardButton("Support Grup", url="https://t.me/Alterego_ID")
         ]
     ]
-    await message.reply_text(START_MSG, reply_markup=InlineKeyboardMarkup(buttons))
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await message.reply_text(START_MSG, reply_markup=reply_markup)
 
 # Handler untuk pesan diteruskan
 @app.on_message(filters.forwarded)
@@ -32,7 +33,7 @@ async def get_forwarded_info(client, message: Message):
         await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
 
 # Handler untuk update bot
-@app.on_message(filters.command("update") & filters.user(OWNER_ID))
+@app.on_message(filters.command("update") & filters.user(OWNER_IDS))
 async def update(client, message: Message):
     await message.reply_text("Bot akan memperbarui dan memulai ulang...")
     # Hentikan bot
