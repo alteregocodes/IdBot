@@ -1,3 +1,5 @@
+# main.py
+
 import os
 import sys
 import subprocess
@@ -7,9 +9,9 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from config import *
 from pyrogram.errors import PeerIdInvalid
-from module import *
+from module.tts import *
 
-app = Client("channel_id_bot", api_id=API_ID, api_hash=api_hash, bot_token=BOT_TOKEN)
+app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
@@ -129,6 +131,8 @@ async def tts_command(client, message: Message):
     try:
         await client.send_voice(message.chat.id, voice=output_file)
         await message.delete()
+        language_name = get_lang_name(language)
+        await client.send_message(message.from_user.id, f"Bahasa TTS diatur ke {language_name}")
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
