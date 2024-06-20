@@ -14,9 +14,9 @@ os.makedirs("downloads", exist_ok=True)
 async def download_progress_hook(d, message):
     if d['status'] == 'downloading':
         percent = d['_percent_str'].strip()
-        await message.edit_text(f"Sedang mendownload... {percent}")
+        await message.edit(f"Sedang mendownload... {percent}")
     elif d['status'] == 'finished':
-        await message.edit_text("Download selesai, sedang memproses...")
+        await message.edit("Download selesai, sedang memproses...")
 
 def register_handlers(app):
     @app.on_message(filters.command("song"))
@@ -56,15 +56,15 @@ def register_handlers(app):
             if new_file:
                 audio_file_path = os.path.join("downloads", new_file)
                 logger.info(f"Newly downloaded file: {audio_file_path}")
-                await progress_message.edit_text("Pengunduhan selesai. Mengirim audio...")
+                await progress_message.edit("Pengunduhan selesai. Mengirim audio...")
                 await message.reply_audio(audio_file_path, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
                 os.remove(audio_file_path)
             else:
-                await progress_message.edit_text("File audio tidak ditemukan setelah diunduh.")
+                await progress_message.edit("File audio tidak ditemukan setelah diunduh.")
                 logger.error("File audio tidak ditemukan setelah diunduh.")
         except Exception as e:
             logger.error(f"Terjadi kesalahan: {e}")
-            await progress_message.edit_text(f"Terjadi kesalahan: {e}")
+            await progress_message.edit(f"Terjadi kesalahan: {e}")
 
     @app.on_message(filters.command("vsong"))
     async def download_video(client, message: Message):
@@ -98,15 +98,15 @@ def register_handlers(app):
             if new_file:
                 video_file_path = os.path.join("downloads", new_file)
                 logger.info(f"Newly downloaded video file: {video_file_path}")
-                await progress_message.edit_text("Pengunduhan selesai. Mengirim video...")
+                await progress_message.edit("Pengunduhan selesai. Mengirim video...")
                 await message.reply_video(video_file_path, caption=info_dict.get('title', 'Unknown'))
                 os.remove(video_file_path)
             else:
-                await progress_message.edit_text("File video tidak ditemukan setelah diunduh.")
+                await progress_message.edit("File video tidak ditemukan setelah diunduh.")
                 logger.error("File video tidak ditemukan setelah diunduh.")
         except Exception as e:
             logger.error(f"Terjadi kesalahan: {e}")
-            await progress_message.edit_text(f"Terjadi kesalahan: {e}")
+            await progress_message.edit(f"Terjadi kesalahan: {e}")
 
 # Panggil register_handlers dalam __init__.py
 def init_pytgcalls(app):
