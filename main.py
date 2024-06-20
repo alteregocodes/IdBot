@@ -33,7 +33,7 @@ LANG_CODES = {
 }
 
 # Default bahasa TTS
-DEFAULT_LANG = "en"  # Bahasa Inggris sebagai default
+DEFAULT_LANG = "id"  # Bahasa Inggris sebagai default
 
 # Inisialisasi translator untuk gpytranslate
 translator = Translator()
