@@ -122,18 +122,23 @@ async def carbon_command(client, message: Message):
     await carbon_func(client, message)
 
 # Handler untuk perintah TTS (/tts)
-@app.on_message(filters.command("tts") & (filters.group | filters.private))
+# Handler untuk perintah TTS (/tts)
+@app.on_message(filters.command("tts") & filters.private)
 async def tts_command(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
         return
+    
     text = message.reply_to_message.text if message.reply_to_message else message.text.split(None, 1)[1]
     language = get_lang_code(message.from_user.id)
     output_file = text_to_speech(text, language)
+    
     try:
+        # Mengirimkan hasil audio kepada pengguna
         await client.send_voice(message.chat.id, voice=output_file)
-        language_name = get_lang_name(language)
-        await client.send_message(message.from_user.id, f"Bahasa TTS diatur ke {language_name}")
+        
+        # Mereply pengguna dengan teks bahwa pesan telah dikirim
+        await message.reply_text("Berhasil mengirimkan pesan suara.")
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
@@ -152,6 +157,7 @@ async def set_tts_language(client, message: Message):
     await client.delete_messages(message.chat.id, message_reply.message_id)  # Hapus pesan ini setelah beberapa detik
 
 # Handler untuk callback setting bahasa TTS
+# Handler untuk callback setting bahasa TTS
 @app.on_callback_query(filters.regex(r"^set_lang_"))
 async def set_tts_language_callback(client, callback_query: CallbackQuery):
     language_code = callback_query.data.split("_")[2]
@@ -162,10 +168,7 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     await callback_query.answer(f"Bahasa TTS diatur ke {language_name}", show_alert=True)
     
     # Hapus pilihan bahasa dari keyboard inline
-    await callback_query.message.delete_reply_markup()
-    
-    # Hapus pesan pilihan bahasa yang dikirim oleh bot
-    await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
+    await callback_query.message.edit_reply_markup(reply_markup=None)
     
     # Hapus pesan pilihan bahasa yang dikirim oleh bot
     await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
