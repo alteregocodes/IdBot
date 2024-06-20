@@ -22,10 +22,11 @@ def transcribe_audio(audio_path):
 def register_handlers(app):
     @app.on_message(filters.command("uteks") & filters.reply)
     async def audio_to_text(client, message: Message):
-        if not message.reply_to_message.audio:
-            await message.reply_text("Harap balas pesan ini dengan file audio yang ingin diubah menjadi teks.")
+        if not (message.reply_to_message.voice or message.reply_to_message.audio):
+            await message.reply_text("Harap balas pesan ini dengan file audio atau pesan suara yang ingin diubah menjadi teks.")
             return
         
+        # Mengunduh file audio atau pesan suara
         audio_file = await message.reply_to_message.download()
         audio = AudioSegment.from_file(audio_file)
         audio = audio.set_frame_rate(16000).set_channels(1)  # Konversi ke format yang sesuai
@@ -40,5 +41,8 @@ def register_handlers(app):
         except Exception as e:
             await message.reply_text(f"Terjadi kesalahan: {e}")
         finally:
-            os.remove(audio_file)
-            os.remove(temp_audio_path)
+            # Hapus file yang diunduh dan file sementara
+            if os.path.exists(audio_file):
+                os.remove(audio_file)
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
