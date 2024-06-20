@@ -1,10 +1,10 @@
-# main.py
-
+# Import library dan module yang diperlukan
 import os
 import sys
 import subprocess
 import asyncio
 import aiohttp
+from datetime import datetime
 from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
@@ -12,6 +12,7 @@ from config import *
 from pyrogram.errors import PeerIdInvalid
 from module.tts import *
 
+# Inisialisasi Client Pyrogram
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
@@ -52,6 +53,38 @@ async def carbon_func(client, message):
         ),
     )
     carbon.close()
+
+# Fungsi untuk menyambut anggota baru dengan gambar carbonasi
+async def welcome_new_member(client, message):
+    new_members = message.new_chat_members
+    chat_id = message.chat.id
+    group_name = message.chat.title
+    
+    for member in new_members:
+        fullname = member.first_name + " " + member.last_name if member.last_name else member.first_name
+        username = member.username if member.username else "-"
+        user_id = member.id
+        join_date = datetime.fromtimestamp(member.joined_date).strftime("%d %B %Y")
+        
+        text = (
+            f"Nama: {fullname}\n"
+            f"ID: {user_id}\n"
+            f"Username: @{username}\n"
+            f"Tanggal Bergabung: {join_date}\n\n"
+            f"Selamat datang di {group_name}, semoga betah!"
+        )
+        
+        carbon_image = await make_carbon(text)
+        
+        # Kirim gambar carbonasi sebagai sambutan
+        await client.send_photo(
+            chat_id,
+            photo=carbon_image,
+            caption=f"Selamat datang @{username} di {group_name}, semoga betah!",
+        )
+        
+        # Tutup file gambar
+        carbon_image.close()
 
 # Handler untuk memulai bot
 @app.on_message(filters.command("start") & filters.private)
@@ -135,7 +168,10 @@ async def tts_command(client, message: Message):
     
     try:
         # Kirim hasil TTS sebagai voice tanpa menghapus pesan pengguna
-        await message.reply_voice(voice=output_file)
+        await message.reply_voice(
+            voice=output_file,
+            reply_to_message_id=message.message_id
+        )
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
@@ -151,9 +187,9 @@ async def set_tts_language(client, message: Message):
             buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
     reply_markup = InlineKeyboardMarkup(buttons)
     message_reply = await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
-    await client.delete_messages(message.chat.id, message_reply.message_id)  # Hapus pesan ini setelah beberapa detik
+    await asyncio.sleep(10)  # Hapus pesan ini setelah beberapa detik
+    await client.delete_messages(message.chat.id, message_reply.message_id)
 
-# Handler untuk callback setting bahasa TTS
 # Handler untuk callback setting bahasa TTS
 @app.on_callback_query(filters.regex(r"^set_lang_"))
 async def set_tts_language_callback(client, callback_query: CallbackQuery):
@@ -177,7 +213,43 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
 @app.on_message(filters.command("start") & filters.group)
 async def start_group(client, message: Message):
     await message.reply_text("Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan.")
+
+# Handler untuk menyambut anggota baru di grup
+@app.on_chat_members_added()
+async def welcome_new_members(client, message: Message):
+    await welcome_new_member(client, message)
+
+# Fungsi untuk menyambut anggota baru dengan gambar carbonasi
+async def welcome_new_member(client, message):
+    new_members = message.new_chat_members
+    chat_id = message.chat.id
+    group_name = message.chat.title
     
+    for member in new_members:
+        fullname = member.first_name + " " + member.last_name if member.last_name else member.first_name
+        username = member.username if member.username else "-"
+        user_id = member.id
+        join_date = datetime.fromtimestamp(member.joined_date).strftime("%d %B %Y")
+        
+        text = (
+            f"Nama: {fullname}\n"
+            f"ID: {user_id}\n"
+            f"Username: @{username}\n"
+            f"Tanggal Bergabung: {join_date}\n\n"
+            f"Selamat datang di {group_name}, semoga betah!"
+        )
+        
+        carbon_image = await make_carbon(text)
+        
+        # Kirim gambar carbonasi sebagai sambutan
+        await client.send_photo(
+            chat_id,
+            photo=carbon_image,
+            caption=f"Selamat datang @{username} di {group_name}, semoga betah!",
+        )
+        
+        # Tutup file gambar
+        carbon_image.close()
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
@@ -192,3 +264,4 @@ print("Bot telah dijalankan, apabila butuh bantuan chat @SayaKyu\nManage by @Alt
 
 # Menjalankan bot
 app.run()
+
