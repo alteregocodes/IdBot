@@ -20,16 +20,16 @@ def register_handlers(app):
                 'preferredquality': '192',
             }],
             'outtmpl': 'downloads/%(title)s.%(ext)s',
-            'default_search': 'ytsearch',  # Tambahkan default_search
+            'default_search': 'ytsearch',
             'quiet': True,
+            'noplaylist': True,
         }
 
         try:
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(query, download=True)
-                audio_file = ydl.prepare_filename(info_dict)
-                os.rename(audio_file, audio_file + ".mp3")
-                audio_file += ".mp3"
+                base, ext = os.path.splitext(ydl.prepare_filename(info_dict))
+                audio_file = f"{base}.mp3"
                 
                 await message.reply_audio(audio_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
                 os.remove(audio_file)
@@ -47,8 +47,9 @@ def register_handlers(app):
         ydl_opts = {
             'format': 'best',
             'outtmpl': 'downloads/%(title)s.%(ext)s',
-            'default_search': 'ytsearch',  # Tambahkan default_search
+            'default_search': 'ytsearch',
             'quiet': True,
+            'noplaylist': True,
         }
 
         try:
