@@ -2,5 +2,7 @@ aiohttp
 pyrogram
 gtts
 python-telegram-bot
+tgcrypto
+pytgcalls
 yt-dlp
 youtube_dl
