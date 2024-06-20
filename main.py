@@ -153,10 +153,7 @@ async def tts_command(client, message: Message):
     output_file = text_to_speech(text, language)
     
     try:
-        await message.reply_voice(
-            voice=output_file,
-            reply_to_message_id=message.message_id  # Menggunakan message.message_id di sini
-        )
+        await message.reply_voice(voice=output_file)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
