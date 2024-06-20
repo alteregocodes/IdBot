@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import asyncio
+import aiohttp
 from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
