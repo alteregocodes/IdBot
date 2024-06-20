@@ -28,6 +28,7 @@ LANG_CODES = {
     "Sundanese": "su",
     "Thai": "th",
     "Filipino": "fil",
+    "Indonesia": "id"
     # Tambahkan bahasa lain sesuai kebutuhan
 }
 
