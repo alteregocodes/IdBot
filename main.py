@@ -142,10 +142,13 @@ async def tts_command(client, message: Message):
 @app.on_message(filters.command("bahasatts") & (filters.group | filters.private))
 async def set_tts_language(client, message: Message):
     buttons = []
+    user_language = get_lang_code(message.from_user.id)
     for lang, code in LANG_CODES.items():
-        buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
+        if code != user_language:  # Jangan tampilkan bahasa yang sudah dipilih pengguna
+            buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
     reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
+    message_reply = await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
+    await client.delete_messages(message.chat.id, message_reply.message_id)  # Hapus pesan ini setelah beberapa detik
 
 # Handler untuk callback setting bahasa TTS
 @app.on_callback_query(filters.regex(r"^set_lang_"))
@@ -153,7 +156,16 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     language_code = callback_query.data.split("_")[2]
     set_lang_preference(callback_query.from_user.id, language_code)
     language_name = get_lang_name(language_code)
-    await callback_query.answer(f"Bahasa TTS diatur ke {language_name}")
+    
+    # Tampilkan alert bahwa bahasa TTS telah diatur
+    await callback_query.answer(f"Bahasa TTS diatur ke {language_name}", show_alert=True)
+    
+    # Hapus pilihan bahasa dari keyboard inline
+    user_id = callback_query.from_user.id
+    await callback_query.message.delete_reply_markup()
+    
+    # Hapus pesan pilihan bahasa yang dikirim oleh bot
+    await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
 
 # Handler untuk memulai bot di grup
 @app.on_message(filters.command("start") & filters.group)
