@@ -22,4 +22,4 @@ def register_handlers(app):
         else:
             text = f"ID Anda adalah: <code>{user_id}</code>"
         
-        await message.reply_text(text)
+        await message.reply_text(text, parse_mode="html")
