@@ -117,21 +117,6 @@ async def get_user_id(client, message: Message):
 async def carbon_command(client, message: Message):
     await carbon_func(client, message)
 
-# Handler untuk perintah TTS (/tts)
-@app.on_message(filters.command("tts") & filters.private)
-async def tts_command_handler(client, message: Message):
-    await tts_command(client, message)
-
-# Handler untuk perintah setting bahasa TTS (/bahasatts)
-@app.on_message(filters.command("bahasatts") & filters.private)
-async def set_tts_language_handler(client, message: Message):
-    await set_tts_language(client, message)
-
-# Handler untuk callback setting bahasa TTS
-@app.on_callback_query(filters.regex(r"^set_lang_"))
-async def set_tts_language_callback_handler(client, callback_query: CallbackQuery):
-    await set_tts_language_callback(client, callback_query)
-
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
 
