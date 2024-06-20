@@ -6,9 +6,10 @@ import aiohttp
 import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery  # Tambahkan CallbackQuery di sini
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
+from module.update import update  # Impor fungsi update dari module.update
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -89,19 +90,6 @@ async def get_forwarded_info(client, message: Message):
     else:
         await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
 
-# Handler untuk update bot
-@app.on_message(filters.command("update") & filters.user(OWNER_IDS))
-async def update(client, message: Message):
-    await message.reply_text("Bot akan memperbarui dan memulai ulang...")
-    # Hentikan bot
-    await app.stop()
-    # Lakukan git pull dan simpan hasilnya ke file log sementara
-    result = subprocess.run(["git", "pull"], capture_output=True, text=True)
-    with open(UPDATE_LOG_FILE, "w") as f:
-        f.write(result.stdout + "\n" + result.stderr)
-    # Jalankan ulang bot
-    os.execv(sys.executable, ['python'] + sys.argv)
-
 # Handler untuk mendapatkan ID pengguna
 @app.on_message(filters.command("id"))
 async def get_user_id(client, message: Message):
@@ -165,9 +153,4 @@ async def back_to_help_callback(client, callback_query: CallbackQuery):
 import atexit
 
 @atexit.register
-def close_aiohttp_session():
-    if aiosession:
-        asyncio.run(aiosession.close())
-
-if __name__ == "__main__":
-    app.run()
+def close_aiohttp_sessio
