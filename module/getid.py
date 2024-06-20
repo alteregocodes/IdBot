@@ -8,8 +8,8 @@ def register_handlers(app):
     async def get_forwarded_info(client, message: Message):
         if message.forward_from_chat:
             chat_id = message.forward_from_chat.id
-            chat_id_formatted = f"`-{abs(chat_id)}`" if chat_id < 0 else f"`{chat_id}`"
-            await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}", parse_mode="markdown")
+            chat_id_formatted = f"-{abs(chat_id)}" if chat_id < 0 else str(chat_id)
+            await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}")
         else:
             await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
 
@@ -19,9 +19,8 @@ def register_handlers(app):
         chat_id = message.chat.id  # Mendapatkan ID chat tempat perintah diterima
 
         if message.chat.type in ["group", "supergroup"]:
-            text = f"ID Anda adalah: `{user_id}`\nID Grup ini adalah: `{chat_id}`"
+            text = f"ID Anda adalah: {user_id}\nID Grup ini adalah: {chat_id}"
         else:
-            text = f"ID Anda adalah: `{user_id}`"
+            text = f"ID Anda adalah: {user_id}"
         
-        await message.reply_text(text, parse_mode="markdown")
-
+        await message.reply_text(text)
