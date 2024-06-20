@@ -141,8 +141,7 @@ def close_aiohttp_session():
         asyncio.run(aiosession.close())
 
 # Menampilkan pesan saat bot dijalankan
-print("Bot telah dijalankan, apabila butuh bantuan chat @SayaK
-yu\nManage by @AlteregoNetwork")
+print("Bot telah dijalankan, apabila butuh bantuan chat @SayaKyu\nManage by @AlteregoNetwork")
 
 # Menjalankan bot
 app.run()
