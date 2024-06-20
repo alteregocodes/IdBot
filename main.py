@@ -1,5 +1,3 @@
-# bot.py
-
 import os
 import sys
 import subprocess
@@ -8,11 +6,9 @@ import aiohttp
 import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery  # Tambahkan CallbackQuery di sini
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
-from pyrogram.types import CallbackQuery
-
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -121,17 +117,7 @@ async def get_user_id(client, message: Message):
 async def carbon(client, message: Message):
     await carbon_func(client, message)
 
-# Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
-import atexit
-
-@atexit.register
-def close_aiohttp_session():
-    if aiosession:
-        asyncio.run(aiosession.close())
-
-
-
-# Daftar modul dan keterangannya
+# Tambahkan handler untuk perintah /help dan tombol interaktif
 MODUL_DESC = {
     "carbon": "Mengubah kode menjadi gambar dengan /carbon <kode>.",
     "update": "Memperbarui bot dengan /update (Hanya untuk pemilik bot).",
@@ -140,9 +126,13 @@ MODUL_DESC = {
 
 # Fungsi untuk menampilkan daftar modul
 async def show_modules(client, message_or_callback):
-    buttons = [
-        [InlineKeyboardButton(name, callback_data=f"mod_{name}") for name in MODUL_DESC]
-    ]
+    buttons = []
+    row = []
+    for idx, name in enumerate(MODUL_DESC):
+        row.append(InlineKeyboardButton(name, callback_data=f"mod_{name}"))
+        if (idx + 1) % 2 == 0 or idx == len(MODUL_DESC) - 1:
+            buttons.append(row)
+            row = []
     reply_markup = InlineKeyboardMarkup(buttons)
     text = "Berikut adalah beberapa fitur yang tersedia:"
     if isinstance(message_or_callback, Message):
@@ -171,9 +161,13 @@ async def module_callback(client, callback_query: CallbackQuery):
 async def back_to_help_callback(client, callback_query: CallbackQuery):
     await show_modules(client, callback_query)
 
-if __name__ == "__main__":
-    app.run()
+# Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
+import atexit
 
+@atexit.register
+def close_aiohttp_session():
+    if aiosession:
+        asyncio.run(aiosession.close())
 
 if __name__ == "__main__":
     app.run()
