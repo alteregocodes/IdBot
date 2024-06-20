@@ -5,16 +5,15 @@ from io import BytesIO
 import os
 
 LANG_CODES = {
+    "Indonesian": "id",
+    "Sundanese": "su",
+    "Japanese": "ja",
+    "Amharic": "am",
     "Afrikaans": "af",
     "Albanian": "sq",
-    "Amharic": "am",
     "Arabic": "ar",
-    "Japanese": "ja",
     "Korean": "ko",
-    "Sundanese": "su",
-    "Thai": "th",
-    "Filipino": "fil",
-    "Indonesian": "id"
+    "Thai": "th"
     # Tambahkan bahasa lain sesuai kebutuhan
 }
 
