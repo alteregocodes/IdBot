@@ -31,7 +31,7 @@ async def carbon_func(client, message):
         text = message.reply_to_message.text or message.reply_to_message.caption
     if not text:
         return await message.delete()
-    ex = await message.reply("❄️ Memproses . . .")
+    ex = await message.reply("⚙️ Memproses . . .")
     carbon = await make_carbon(text)
     await ex.edit("🔼 Mengunggah . . .")
     await asyncio.gather(
@@ -44,9 +44,10 @@ async def carbon_func(client, message):
     )
     carbon.close()
 
-@Client.on_message(filters.command("carbon") & (filters.group | filters.private))
-async def carbon_command(client, message: Message):
-    await carbon_func(client, message)
+def register_handlers(app):
+    @app.on_message(filters.command("carbon") & (filters.group | filters.private))
+    async def carbon_command(client, message: Message):
+        await carbon_func(client, message)
 
 import atexit
 
