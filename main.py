@@ -1,10 +1,10 @@
-#main.py
+# main.py
 
 import asyncio
 import logging
 from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN
-import module
+from module import register_all_handlers
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# Register all handlers
-module.register_all_handlers(app)
+# Register all handlers including update_command
+register_all_handlers(app)
 
 # Handle graceful shutdown
 def on_shutdown():
