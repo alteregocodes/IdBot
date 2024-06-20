@@ -147,7 +147,7 @@ async def tts_command(client, message: Message):
         await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
         return
     text = message.reply_to_message.text if message.reply_to_message else message.text.split(None, 1)[1]
-    language = LANG_CODES.get(client._translate[client.me.id]["negara"], DEFAULT_LANG)
+    language = LANG_CODES.get(message.from_user.id, DEFAULT_LANG)
     tts = gTTS(text, lang=language)
     tts.save("output.ogg")
     try:
@@ -171,7 +171,7 @@ async def set_tts_language(client, message: Message):
 @app.on_callback_query(filters.regex(r"^set_lang_"))
 async def set_tts_language_callback(client, callback_query: CallbackQuery):
     language_code = callback_query.data.split("_")[2]
-    client._translate[client.me.id]["negara"] = language_code
+    client._translate[client.me.id] = {"negara": language_code}
     await callback_query.answer(f"Bahasa TTS diatur ke {language_code}")
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
