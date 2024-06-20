@@ -29,12 +29,16 @@ def register_handlers(app):
     @app.on_message(filters.command("bahasatts") & (filters.group | filters.private))
     async def set_tts_language(client, message: Message):
         buttons = []
-        user_language = get_lang_code(message.from_user.id)
+        user_language_code = get_lang_code(message.from_user.id)
+        user_language_name = get_lang_name(user_language_code)
         for lang, code in LANG_CODES.items():
-            if code != user_language:
+            if code != user_language_code:
                 buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
         reply_markup = InlineKeyboardMarkup(buttons)
-        message_reply = await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
+        message_reply = await message.reply_text(
+            f"Pilih bahasa untuk TTS:\n\nBahasa yang digunakan sekarang: {user_language_name}",
+            reply_markup=reply_markup
+        )
         await asyncio.sleep(10)
         await message_reply.delete()  # Menghapus pesan pemilihan bahasa setelah beberapa detik
 
