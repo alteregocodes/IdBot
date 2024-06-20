@@ -122,8 +122,7 @@ async def carbon_command(client, message: Message):
     await carbon_func(client, message)
 
 # Handler untuk perintah TTS (/tts)
-# Handler untuk perintah TTS (/tts)
-@app.on_message(filters.command("tts") & filters.private)
+@app.on_message(filters.command("tts"))
 async def tts_command(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
@@ -134,11 +133,7 @@ async def tts_command(client, message: Message):
     output_file = text_to_speech(text, language)
     
     try:
-        # Mengirimkan hasil audio kepada pengguna
         await client.send_voice(message.chat.id, voice=output_file)
-        
-        # Mereply pengguna dengan teks bahwa pesan telah dikirim
-        await message.reply_text("Berhasil mengirimkan pesan suara.")
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
@@ -168,10 +163,13 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     await callback_query.answer(f"Bahasa TTS diatur ke {language_name}", show_alert=True)
     
     # Hapus pilihan bahasa dari keyboard inline
-    await callback_query.message.edit_reply_markup(reply_markup=None)
-    
-    # Hapus pesan pilihan bahasa yang dikirim oleh bot
-    await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
+    await callback_query.message.delete_reply_markup()
+
+    try:
+        # Hapus pesan pilihan bahasa yang dikirim oleh bot
+        await callback_query.message.delete()
+    except Exception as e:
+        print(f"Failed to delete message: {e}")
 
 # Handler untuk memulai bot di grup
 @app.on_message(filters.command("start") & filters.group)
