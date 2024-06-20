@@ -5,7 +5,7 @@ import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
+from config import *
 from pyrogram.errors import PeerIdInvalid
 from module import *
 
