@@ -28,15 +28,21 @@ def register_handlers(app):
         try:
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(query, download=True)
-                base, ext = os.path.splitext(ydl.prepare_filename(info_dict))
+                downloaded_file = ydl.prepare_filename(info_dict)
+                base, ext = os.path.splitext(downloaded_file)
                 audio_file = f"{base}.mp3"
-
+                
                 # Pastikan file audio ada
                 if os.path.exists(audio_file):
                     await message.reply_audio(audio_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
                     os.remove(audio_file)
                 else:
-                    await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file}")
+                    # Jika file dengan ekstensi .mp3 tidak ditemukan, cek file asli
+                    if os.path.exists(downloaded_file):
+                        await message.reply_audio(downloaded_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
+                        os.remove(downloaded_file)
+                    else:
+                        await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {downloaded_file}")
         except Exception as e:
             await message.reply_text(f"Terjadi kesalahan: {e}")
 
