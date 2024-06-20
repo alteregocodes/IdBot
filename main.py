@@ -220,10 +220,10 @@ async def welcome_new_members(client, chat_member_added: ChatMemberAdded):
     await welcome_new_member(client, chat_member_added)
 
 # Fungsi untuk menyambut anggota baru dengan gambar carbonasi
-async def welcome_new_member(client, chat_member_added: ChatMemberAdded):
-    new_member = chat_member_added.new_chat_member
-    chat_id = chat_member_added.chat.id
-    group_name = chat_member_added.chat.title
+async def welcome_new_member(client, chat_member_updated: ChatMemberUpdated):
+    new_member = chat_member_updated.new_chat_member
+    chat_id = chat_member_updated.chat.id
+    group_name = chat_member_updated.chat.title
     
     fullname = new_member.user.first_name + " " + (new_member.user.last_name or "")
     username = new_member.user.username or "-"
