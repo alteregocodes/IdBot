@@ -20,6 +20,7 @@ def register_handlers(app):
                 'preferredquality': '192',
             }],
             'outtmpl': 'downloads/%(title)s.%(ext)s',
+            'default_search': 'ytsearch',  # Tambahkan default_search
             'quiet': True,
         }
 
@@ -46,6 +47,7 @@ def register_handlers(app):
         ydl_opts = {
             'format': 'best',
             'outtmpl': 'downloads/%(title)s.%(ext)s',
+            'default_search': 'ytsearch',  # Tambahkan default_search
             'quiet': True,
         }
 
