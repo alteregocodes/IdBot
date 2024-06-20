@@ -3,3 +3,4 @@ pyrogram
 gtts
 python-telegram-bot
 yt-dlp
+youtubesearchpython
