@@ -215,41 +215,41 @@ async def start_group(client, message: Message):
     await message.reply_text("Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan.")
 
 # Handler untuk menyambut anggota baru di grup
-@app.on_chat_member_updated()
-async def welcome_new_members(client, message: Message):
-    await welcome_new_member(client, message)
+@app.on_chat_member_added()
+async def welcome_new_members(client, chat_member_added: ChatMemberAdded):
+    await welcome_new_member(client, chat_member_added)
 
 # Fungsi untuk menyambut anggota baru dengan gambar carbonasi
-async def welcome_new_member(client, message):
-    new_members = message.new_chat_members
-    chat_id = message.chat.id
-    group_name = message.chat.title
+async def welcome_new_member(client, chat_member_added: ChatMemberAdded):
+    new_member = chat_member_added.new_chat_member
+    chat_id = chat_member_added.chat.id
+    group_name = chat_member_added.chat.title
     
-    for member in new_members:
-        fullname = member.first_name + " " + member.last_name if member.last_name else member.first_name
-        username = member.username if member.username else "-"
-        user_id = member.id
-        join_date = datetime.fromtimestamp(member.joined_date).strftime("%d %B %Y")
-        
-        text = (
-            f"Nama: {fullname}\n"
-            f"ID: {user_id}\n"
-            f"Username: @{username}\n"
-            f"Tanggal Bergabung: {join_date}\n\n"
-            f"Selamat datang di {group_name}, semoga betah!"
-        )
-        
-        carbon_image = await make_carbon(text)
-        
-        # Kirim gambar carbonasi sebagai sambutan
-        await client.send_photo(
-            chat_id,
-            photo=carbon_image,
-            caption=f"Selamat datang @{username} di {group_name}, semoga betah!",
-        )
-        
-        # Tutup file gambar
-        carbon_image.close()
+    fullname = new_member.user.first_name + " " + (new_member.user.last_name or "")
+    username = new_member.user.username or "-"
+    user_id = new_member.user.id
+    join_date = datetime.now().strftime("%d %B %Y")
+    
+    text = (
+        f"Nama: {fullname}\n"
+        f"ID: {user_id}\n"
+        f"Username: @{username}\n"
+        f"Tanggal Bergabung: {join_date}\n\n"
+        f"Selamat datang di {group_name}, semoga betah!"
+    )
+    
+    carbon_image = await make_carbon(text)
+    
+    # Kirim gambar carbonasi sebagai sambutan
+    await client.send_photo(
+        chat_id,
+        photo=carbon_image,
+        caption=f"Selamat datang @{username} di {group_name}, semoga betah!",
+    )
+    
+    # Tutup file gambar
+    carbon_image.close()
+
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
