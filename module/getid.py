@@ -23,7 +23,7 @@ def register_handlers(app):
             if message.chat.type in ["group", "supergroup"]:
                 text = f"ID Anda adalah: {user_id}\nID Grup ini adalah: {chat_id}"
             else:
-                text = f"ID Anda adalah: {user_id}\nID Chat ini adalah: {chat_id}"  # Tambahan untuk chat privat atau channel
+                text = f"ID Anda adalah: <code>{user_id}</code>\n\nID Chat ini adalah: <code>{chat_id}</code>"  # Tambahan untuk chat privat atau channel
             
             await message.reply_text(text)
         except Exception as e:
