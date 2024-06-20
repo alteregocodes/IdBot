@@ -13,7 +13,7 @@ os.makedirs("downloads", exist_ok=True)
 
 async def download_progress_hook(d, message):
     if d['status'] == 'downloading':
-        percent = d['_percent_str']
+        percent = d['_percent_str'].strip()
         await message.edit_text(f"Sedang mendownload... {percent}")
     elif d['status'] == 'finished':
         await message.edit_text("Download selesai, sedang memproses...")
@@ -139,5 +139,4 @@ def init_pytgcalls(app):
     pytgcalls.start()
 
     return pytgcalls, audio_queue
-
 
