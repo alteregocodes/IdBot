@@ -216,8 +216,8 @@ async def start_group(client, message: Message):
 
 # Handler untuk menyambut anggota baru di grup
 @app.on_chat_member_updated()
-async def welcome_new_members(client, chat_member_added: ChatMemberAdded):
-    await welcome_new_member(client, chat_member_added)
+async def welcome_new_members(client, chat_member_updated: ChatMemberUpdated):
+    await welcome_new_member(client, chat_member_updated)
 
 # Fungsi untuk menyambut anggota baru dengan gambar carbonasi
 async def welcome_new_member(client, chat_member_updated: ChatMemberUpdated):
