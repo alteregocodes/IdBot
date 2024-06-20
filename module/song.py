@@ -139,3 +139,5 @@ def init_pytgcalls(app):
     pytgcalls.start()
 
     return pytgcalls, audio_queue
+
+
