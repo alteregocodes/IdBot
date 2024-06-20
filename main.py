@@ -1,10 +1,17 @@
+# Import library dan module yang diperlukan
+import os
+import sys
+import subprocess
+import asyncio
+import aiohttp
 from datetime import datetime
 from io import BytesIO
-import aiohttp
-import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ChatMemberUpdated
 from config import *
+from pyrogram.errors import PeerIdInvalid
+from module.tts import *
+import json
 
 # Inisialisasi Client Pyrogram
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -79,10 +86,53 @@ async def welcome_new_member(client, chat_member_updated: ChatMemberUpdated):
     # Tutup file gambar
     carbon_image.close()
 
+# Fungsi untuk mendapatkan kode bahasa yang disimpan
+def get_lang_code(user_id):
+    try:
+        with open('language_preferences.json', 'r') as f:
+            lang_preferences = json.load(f)
+        return lang_preferences.get(str(user_id), 'en')
+    except FileNotFoundError:
+        return 'en'
+
+# Fungsi untuk menyimpan preferensi bahasa
+def set_lang_preference(user_id, lang_code):
+    try:
+        with open('language_preferences.json', 'r') as f:
+            lang_preferences = json.load(f)
+    except FileNotFoundError:
+        lang_preferences = {}
+    
+    lang_preferences[str(user_id)] = lang_code
+    
+    with open('language_preferences.json', 'w') as f:
+        json.dump(lang_preferences, f)
+
+# Fungsi untuk mendapatkan nama bahasa dari kode bahasa
+def get_lang_name(lang_code):
+    for lang, code in LANG_CODES.items():
+        if code == lang_code:
+            return lang
+    return "Unknown"
+
 # Handler untuk memulai bot
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
-    # Code untuk start bot
+    # Periksa apakah ada file log pembaruan
+    if os.path.exists(UPDATE_LOG_FILE):
+        with open(UPDATE_LOG_FILE, "r") as f:
+            update_log = f.read()
+        # Kirim log pembaruan ke semua owner
+        for owner_id in OWNER_IDS:
+            try:
+                await client.send_message(owner_id, f"Bot telah berhasil diperbarui:\n\n{update_log}")
+            except PeerIdInvalid:
+                print(f"Failed to send message to {owner_id}: PeerIdInvalid")
+            except Exception as e:
+                print(f"Failed to send message to {owner_id}: {e}")
+        # Hapus file log setelah dikirim
+        os.remove(UPDATE_LOG_FILE)
+    
     buttons = [
         [InlineKeyboardButton("Developer", url="https://t.me/SayaKyu")],
         [
@@ -196,38 +246,8 @@ async def start_group(client, message: Message):
 # Handler untuk menyambut anggota baru di grup
 @app.on_chat_member_updated()
 async def welcome_new_members(client, chat_member_updated: ChatMemberUpdated):
-    await welcome_new_member(client, chat_member_updated)
-
-# Fungsi untuk menyambut anggota baru dengan gambar carbonasi
-async def welcome_new_member(client, chat_member_updated: ChatMemberUpdated):
-    new_member = chat_member_updated.new_chat_member
-    chat_id = chat_member_updated.chat.id
-    group_name = chat_member_updated.chat.title
-
-    fullname = new_member.user.first_name + " " + (new_member.user.last_name or "")
-    username = new_member.user.username or "-"
-    user_id = new_member.user.id
-    join_date = datetime.now().strftime("%d %B %Y")
-
-    text = (
-        f"Nama: {fullname}\n"
-        f"ID: {user_id}\n"
-        f"Username: @{username}\n"
-        f"Tanggal Bergabung: {join_date}\n\n"
-        f"Selamat datang di {group_name}, semoga betah!"
-    )
-
-    carbon_image = await make_carbon(text)
-
-    # Kirim gambar carbonasi sebagai sambutan
-    await client.send_photo(
-        chat_id,
-        photo=carbon_image,
-        caption=f"Selamat datang @{username} di {group_name}, semoga betah!",
-    )
-
-    # Tutup file gambar
-    carbon_image.close()
+    if chat_member_updated.new_chat_member and chat_member_updated.new_chat_member.status == "member":
+        await welcome_new_member(client, chat_member_updated)
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
