@@ -3,7 +3,7 @@
 import subprocess
 import asyncio
 import logging
-from pyrogram import Client, filters  # Import filters from pyrogram
+from pyrogram import Client, filters
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, UPDATE_LOG_FILE
 
 # Setup logging
@@ -14,13 +14,23 @@ app = Client("update_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN
 
 async def run_update():
     try:
-        # Run git pull to update the code
-        process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Stop the bot
+        await app.send_message(OWNER_IDS[0], "Bot sedang dihentikan untuk pembaruan...")
+        await app.stop()
+
+        # Run bash command to start bot (assuming start script is outside module directory)
+        process = subprocess.Popen(["bash", "start"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
         if process.returncode != 0:
-            logger.error(f"Error during git pull: {stderr.decode('utf-8')}")
-            return f"Terjadi kesalahan saat melakukan git pull:\n{stderr.decode('utf-8')}"
+            logger.error(f"Error starting bot: {stderr.decode('utf-8')}")
+            return f"Terjadi kesalahan saat memulai ulang bot:\n{stderr.decode('utf-8')}"
+
+        # Perform a graceful restart (if needed, depending on your bot setup)
+        await asyncio.sleep(2)
+
+        # Restart the bot
+        await app.start()
 
         # Read update log file if exists
         update_log = ""
@@ -29,14 +39,6 @@ async def run_update():
                 update_log = file.read()
         except FileNotFoundError:
             update_log = "File log pembaruan tidak ditemukan."
-
-        # Restart the bot
-        await app.send_message(OWNER_IDS[0], "Bot sedang diperbarui...")
-
-        # Perform a graceful restart
-        await asyncio.sleep(2)
-        await app.stop()
-        await app.start()
 
         # Send update log to the owner
         if update_log:
@@ -54,3 +56,6 @@ async def run_update():
 async def update_command(client, message):
     result = await run_update()
     await message.reply_text(result)
+
+if __name__ == "__main__":
+    app.run()
