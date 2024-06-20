@@ -149,7 +149,7 @@ async def set_tts_language(client, message: Message):
 @app.on_callback_query(filters.regex(r"^set_lang_"))
 async def set_tts_language_callback(client, callback_query: CallbackQuery):
     language_code = callback_query.data.split("_")[2]
-    LANG_CODES[callback_query.from_user.id] = language_code
+    LANG_CODES[client.me.id] = language_code  # Menggunakan ID bot sebagai pengidentifikasi
     await callback_query.answer(f"Bahasa TTS diatur ke {language_code}")
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
