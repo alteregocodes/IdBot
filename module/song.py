@@ -2,7 +2,6 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 import yt_dlp as youtube_dl
 import os
-import time
 
 def register_handlers(app):
     @app.on_message(filters.command("song"))
@@ -31,14 +30,13 @@ def register_handlers(app):
                 info_dict = ydl.extract_info(query, download=True)
                 base, ext = os.path.splitext(ydl.prepare_filename(info_dict))
                 audio_file = f"{base}.mp3"
-                
-                # Verifikasi file ada dan menunggu file selesai
-                time.sleep(1)
+
+                # Pastikan file audio ada
                 if os.path.exists(audio_file):
                     await message.reply_audio(audio_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
                     os.remove(audio_file)
                 else:
-                    await message.reply_text("File audio tidak ditemukan setelah diunduh.")
+                    await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file}")
         except Exception as e:
             await message.reply_text(f"Terjadi kesalahan: {e}")
 
@@ -63,12 +61,11 @@ def register_handlers(app):
                 info_dict = ydl.extract_info(query, download=True)
                 video_file = ydl.prepare_filename(info_dict)
                 
-                # Verifikasi file ada dan menunggu file selesai
-                time.sleep(1)
+                # Pastikan file video ada
                 if os.path.exists(video_file):
                     await message.reply_video(video_file, caption=info_dict.get('title', 'Unknown'))
                     os.remove(video_file)
                 else:
-                    await message.reply_text("File video tidak ditemukan setelah diunduh.")
+                    await message.reply_text(f"File video tidak ditemukan setelah diunduh. Path: {video_file}")
         except Exception as e:
             await message.reply_text(f"Terjadi kesalahan: {e}")
