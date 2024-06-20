@@ -9,10 +9,8 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from config import API_ID, API_HASH, BOT_TOKEN, START_MSG, OWNER_IDS, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
-from module.update import update  # Impor fungsi update dari module.update
-from module.start import start  # Impor fungsi start dari module.start
-from module.getid import get_user_id  # Impor fungsi get_user_id dari module.getid
 
+# Buat instance bot
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
@@ -112,4 +110,9 @@ def close_aiohttp_session():
         asyncio.run(aiosession.close())
 
 if __name__ == "__main__":
+    # Impor fungsi handler setelah inisialisasi bot
+    from module.start import start
+    from module.getid import get_user_id
+    from module.update import update
+
     app.run()
