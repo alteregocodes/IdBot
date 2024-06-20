@@ -21,9 +21,13 @@ def register_handlers(app):
         # Debugging output untuk memastikan chat_id diambil dengan benar
         print(f"User ID: {user_id}, Chat ID: {chat_id}, Chat Type: {message.chat.type}")
 
-        if message.chat.type in ["group", "supergroup"]:
-            text = f"ID Anda adalah: `{user_id}`\nID Grup ini adalah: `{chat_id}`"
-        else:
-            text = f"ID Anda adalah: `{user_id}`"
-        
-        await message.reply_text(text)
+        # Log tambahan
+        try:
+            if message.chat.type in ["group", "supergroup"]:
+                text = f"ID Anda adalah: {user_id}\nID Grup ini adalah: {chat_id}"
+            else:
+                text = f"ID Anda adalah: {user_id}"
+            
+            await message.reply_text(text)
+        except Exception as e:
+            print(f"Error sending message: {e}")
