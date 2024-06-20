@@ -1,5 +1,5 @@
 aiohttp
 pyrogram
 gtts
-youtubesearchpython
-wget
+python-telegram-bot==20.0
+yt-dlp==2023.6.5
