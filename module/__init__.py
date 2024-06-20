@@ -6,7 +6,7 @@ from .getid import register_handlers as register_getid_handlers
 from .welcome import register_handlers as register_welcome_handlers
 from .tts import register_handlers as register_tts_handlers
 from .help import register_handlers as register_help_handlers
-from .song import vsong_cmd, song_cmd
+from .song import register_handlers as register_song_handlers  # tambahkan ini
 
 def register_all_handlers(app):
     register_carbon_handlers(app)
@@ -15,5 +15,4 @@ def register_all_handlers(app):
     register_welcome_handlers(app)
     register_tts_handlers(app)
     register_help_handlers(app)
-    app.add_handler(vsong_cmd, group=1)  # Menambahkan handler untuk /vsong
-    app.add_handler(song_cmd, group=2)   # Menambahkan handler untuk /song
+    register_song_handlers(app)  # tambahkan ini
