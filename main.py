@@ -132,7 +132,6 @@ async def tts_command(client, message: Message):
     output_file = text_to_speech(text, language)
     try:
         await client.send_voice(message.chat.id, voice=output_file)
-        await message.delete()
         language_name = get_lang_name(language)
         await client.send_message(message.from_user.id, f"Bahasa TTS diatur ke {language_name}")
     except Exception as e:
