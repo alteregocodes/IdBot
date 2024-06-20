@@ -104,15 +104,17 @@ async def update(client, message: Message):
     os.system("bash start")
     sys.exit(0)
 
-# Handler untuk mendapatkan ID pengguna
+# Handler untuk perintah /id
 @app.on_message(filters.command("id"))
 async def get_user_id(client, message: Message):
     user_id = message.from_user.id
     if message.chat.type in ["group", "supergroup"]:
         chat_id = message.chat.id
-        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>")
+        text = f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>"
     else:
-        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
+        text = f"ID Anda adalah: <code>{user_id}</code>"
+    
+    await message.reply_text(text)
 
 # Handler untuk perintah Carbon (/carbon)
 @app.on_message(filters.command("carbon") & (filters.group | filters.private))
@@ -161,8 +163,10 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     await callback_query.answer(f"Bahasa TTS diatur ke {language_name}", show_alert=True)
     
     # Hapus pilihan bahasa dari keyboard inline
-    user_id = callback_query.from_user.id
     await callback_query.message.delete_reply_markup()
+    
+    # Hapus pesan pilihan bahasa yang dikirim oleh bot
+    await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
     
     # Hapus pesan pilihan bahasa yang dikirim oleh bot
     await client.delete_messages(callback_query.message.chat.id, callback_query.message.message_id)
