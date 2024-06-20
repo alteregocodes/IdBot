@@ -76,3 +76,18 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     set_lang_preference(callback_query.from_user.id, language_code)
     language_name = get_lang_name(language_code)
     await callback_query.answer(f"Bahasa TTS diatur ke {language_name}")
+
+# Handler untuk perintah TTS (/tts)
+@Client.on_message(filters.command("tts"))
+async def tts_command_handler(client, message: Message):
+    await tts_command(client, message)
+
+# Handler untuk perintah setting bahasa TTS (/bahasatts)
+@Client.on_message(filters.command("bahasatts"))
+async def set_tts_language_handler(client, message: Message):
+    await set_tts_language(client, message)
+
+# Handler untuk callback setting bahasa TTS
+@Client.on_callback_query(filters.regex(r"^set_lang_"))
+async def set_tts_language_callback_handler(client, callback_query: CallbackQuery):
+    await set_tts_language_callback(client, callback_query)
