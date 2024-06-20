@@ -215,7 +215,7 @@ async def start_group(client, message: Message):
     await message.reply_text("Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan.")
 
 # Handler untuk menyambut anggota baru di grup
-@app.on_chat_members_added()
+@app.on_chat_member_updated()
 async def welcome_new_members(client, message: Message):
     await welcome_new_member(client, message)
 
