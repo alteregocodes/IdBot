@@ -3,6 +3,7 @@ from pyrogram.types import Message
 import yt_dlp as youtube_dl
 import os
 import logging
+import time
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -33,25 +34,22 @@ def register_handlers(app):
         try:
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(query, download=True)
-                downloaded_file = ydl.prepare_filename(info_dict)
-                base, ext = os.path.splitext(downloaded_file)
+                # Memeriksa file di folder downloads
+                files_before = set(os.listdir("downloads"))
+                base, ext = os.path.splitext(ydl.prepare_filename(info_dict))
                 audio_file = f"{base}.mp3"
 
-                logger.info(f"Downloaded file: {downloaded_file}")
-                logger.info(f"Converted audio file: {audio_file}")
+                # Memastikan file telah dibuat
+                time.sleep(1)
+                files_after = set(os.listdir("downloads"))
+                new_files = files_after - files_before
 
-                # Pastikan file audio ada
-                if os.path.exists(audio_file):
+                if audio_file in new_files:
                     await message.reply_audio(audio_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
                     os.remove(audio_file)
                 else:
-                    # Jika file dengan ekstensi .mp3 tidak ditemukan, cek file asli
-                    if os.path.exists(downloaded_file):
-                        await message.reply_audio(downloaded_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
-                        os.remove(downloaded_file)
-                    else:
-                        logger.error(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {downloaded_file}")
-                        await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {downloaded_file}")
+                    logger.error(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {new_files}")
+                    await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {new_files}")
         except Exception as e:
             logger.error(f"Terjadi kesalahan: {e}")
             await message.reply_text(f"Terjadi kesalahan: {e}")
@@ -79,7 +77,7 @@ def register_handlers(app):
 
                 logger.info(f"Downloaded video file: {video_file}")
 
-                # Pastikan file video ada
+                # Memastikan file video ada
                 if os.path.exists(video_file):
                     await message.reply_video(video_file, caption=info_dict.get('title', 'Unknown'))
                     os.remove(video_file)
