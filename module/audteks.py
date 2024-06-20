@@ -1,64 +1,105 @@
-# module/audteks.py
-
+import telebot
+import traceback
+import speech_recognition as sr
+import subprocess
 import os
 import logging
-from pyrogram import Client, filters
-from pyrogram.types import Message
-import speech_recognition as sr
-from pydub import AudioSegment
-import traceback
+from telebot import types
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+BOT_TOKEN = None
 
-def transcribe_audio(audio_path):
-    recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_path) as source:
-        audio = recognizer.record(source)
+def read_bot_token():
     try:
-        text = recognizer.recognize_google(audio, language="id-ID")  # Speech recognition using Google Web Speech API
-    except sr.UnknownValueError:
-        text = "Tidak dapat mengenali audio"
-    except sr.RequestError as e:
-        text = f"Terjadi kesalahan pada layanan pengenalan suara: {e}"
+        from config import BOT_TOKEN
+    except:
+        pass
+
+    if len(BOT_TOKEN) == 0:
+        BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
+    if BOT_TOKEN is None:
+        raise Exception('Token for the bot must be provided (BOT_TOKEN variable)')
+    return BOT_TOKEN
+
+BOT_TOKEN = read_bot_token()
+
+r = sr.Recognizer()
+bot = telebot.TeleBot(BOT_TOKEN)
+
+LOG_FOLDER = 'logs'
+if not os.path.exists(LOG_FOLDER):
+    os.makedirs(LOG_FOLDER)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename=f'{LOG_FOLDER}/app.log'
+)
+
+logger = logging.getLogger('telegram-bot')
+logging.getLogger('urllib3.connectionpool').setLevel('INFO')
+
+@bot.message_handler(commands=['start'])
+def start_message(message):
+    bot.send_message(message.chat.id, 'Selamat datang! Bot ini dapat mengenali *suara* Anda dalam pesan suara dan menerjemahkannya menjadi *teks*.' + '\n' + 'Dua bahasa yang didukung - Bahasa Indonesia dan Bahasa Inggris' +
+                     '\n' + 'Kirim pesan suara untuk memulai konversi.', parse_mode='Markdown')
+
+
+@bot.message_handler(content_types=['voice'])
+def voice_handler(message):
+    file_id = message.voice.file_id  # check file size. If the file is too big, FFmpeg may not be able to handle it.
+    file = bot.get_file(file_id)
+
+    file_size = file.file_size
+    if int(file_size) >= 715000:
+        bot.send_message(message.chat.id, 'Ukuran file terlalu besar.')
+    else:
+        download_file = bot.download_file(file.file_path)  # download file for processing
+        audio_file = 'audio.ogg'
+        with open(audio_file, 'wb') as file:
+            file.write(download_file)
+
+        language_buttons(message)  # buttons for selecting the language of the voice message
+
+@bot.callback_query_handler(func=lambda call: True)
+def buttons(call):
+    if call.data == 'indonesian':
+        text = voice_recognizer('id-ID')  # call the function with selected language
+        bot.send_message(call.from_user.id, text)  # send the heard text to the user
+        _clear()
+    elif call.data == 'english':
+        text = voice_recognizer('en-US')
+        bot.send_message(call.from_user.id, text)
+        _clear()
+
+def voice_recognizer(language):
+    subprocess.run(['ffmpeg', '-i', 'audio.ogg', 'audio.wav', '-y'])  # formatting ogg file in to wav format
+    text = 'Tidak dapat mengenali audio.'
+    file = sr.AudioFile('audio.wav')
+    with file as source:
+        try:
+            audio = r.record(source)  # listen to file
+            text = r.recognize_google(audio, language=language)  # and write the heard text to a text variable
+        except Exception as e:
+            logger.error(f"Exception:\n {traceback.format_exc()}")
+
     return text
 
-def register_handlers(app):
-    @app.on_message(filters.command("uteks") & filters.reply)
-    async def audio_to_text(client, message: Message):
-        if not (message.reply_to_message.voice or message.reply_to_message.audio):
-            await message.reply_text("Harap balas pesan ini dengan file audio atau pesan suara yang ingin diubah menjadi teks.")
-            return
-        
-        # Download audio file or voice message
-        audio_file = await message.reply_to_message.download()
-        logger.info(f"Audio file downloaded to {audio_file}")
+def language_buttons(message):
+    keyboard = types.InlineKeyboardMarkup()
+    button_id = types.InlineKeyboardButton(text='Bahasa Indonesia', callback_data='indonesian')
+    button_eng = types.InlineKeyboardButton(text='English', callback_data='english')
+    keyboard.add(button_id, button_eng)
+    bot.send_message(message.chat.id, 'Silakan pilih bahasa dari pesan suara.', reply_markup=keyboard)
 
-        # Convert audio to WAV format (required for speech recognition)
-        try:
-            audio = AudioSegment.from_file(audio_file)
-            audio = audio.set_frame_rate(16000).set_channels(1)  # Adjust format if needed
-            temp_audio_path = "converted_audio.wav"
-            audio.export(temp_audio_path, format="wav")
-            logger.info(f"Audio converted to WAV format at {temp_audio_path}")
+def _clear():
+    """Remove unnecessary files"""
+    _files = ['audio.wav', 'audio.ogg']
+    for _file in _files:
+        if os.path.exists(_file):
+            os.remove(_file)
 
-            # Transcribe audio to text
-            await message.reply_text("Sedang mentranskripsi audio, harap tunggu...")
-            text = transcribe_audio(temp_audio_path)
-            await message.reply_text(f"Hasil transkripsi:\n\n{text}")
-        except Exception as e:
-            logger.error(f"Terjadi kesalahan: {e}")
-            await message.reply_text(f"Terjadi kesalahan saat memproses audio: {e}")
-            logger.error(traceback.format_exc())
-        finally:
-            # Clean up: delete downloaded and temporary files
-            if os.path.exists(audio_file):
-                os.remove(audio_file)
-                logger.info(f"Deleted temporary file {audio_file}")
-            if os.path.exists(temp_audio_path):
-                os.remove(temp_audio_path)
-                logger.info(f"Deleted temporary file {temp_audio_path}")
-
-# Ensure to handle any exceptions and log them appropriately
-
+if __name__ == '__main__':
+    logger.info('Bot dimulai')
+    bot.polling(True)
+    logger.info('Bot dihentikan')
