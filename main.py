@@ -133,7 +133,8 @@ async def tts_command(client, message: Message):
     output_file = text_to_speech(text, language)
     
     try:
-        await client.send_voice(message.chat.id, voice=output_file)
+        # Kirim hasil TTS sebagai voice tanpa menghapus pesan pengguna
+        await message.reply_voice(voice=output_file)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
     finally:
