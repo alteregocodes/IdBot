@@ -7,9 +7,11 @@ import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
+from config import API_ID, API_HASH, BOT_TOKEN, START_MSG, OWNER_IDS, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
 from module.update import update  # Impor fungsi update dari module.update
+from module.start import start  # Impor fungsi start dari module.start
+from module.getid import get_user_id  # Impor fungsi get_user_id dari module.getid
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -52,60 +54,7 @@ async def carbon_func(client, message):
     )
     carbon.close()
 
-# Handler untuk memulai bot
-@app.on_message(filters.command("start") & filters.private)
-async def start(client, message: Message):
-    # Periksa apakah ada file log pembaruan
-    if os.path.exists(UPDATE_LOG_FILE):
-        with open(UPDATE_LOG_FILE, "r") as f:
-            update_log = f.read()
-        # Kirim log pembaruan ke semua owner
-        for owner_id in OWNER_IDS:
-            try:
-                await client.send_message(owner_id, f"Bot telah berhasil diperbarui:\n\n{update_log}")
-            except PeerIdInvalid:
-                print(f"Failed to send message to {owner_id}: PeerIdInvalid")
-            except Exception as e:
-                print(f"Failed to send message to {owner_id}: {e}")
-        # Hapus file log setelah dikirim
-        os.remove(UPDATE_LOG_FILE)
-    
-    buttons = [
-        [InlineKeyboardButton("Developer", url="https://t.me/SayaKyu")],
-        [
-            InlineKeyboardButton("Support Channel", url="https://t.me/Alteregonetwork"),
-            InlineKeyboardButton("Support Grup", url="https://t.me/Alterego_ID")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply_text(START_MSG, reply_markup=reply_markup)
-
-# Handler untuk pesan diteruskan
-@app.on_message(filters.forwarded)
-async def get_forwarded_info(client, message: Message):
-    if message.forward_from_chat:
-        chat_id = message.forward_from_chat.id
-        chat_id_formatted = f"<code>-{abs(chat_id)}</code>" if chat_id < 0 else str(chat_id)
-        await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}")
-    else:
-        await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
-
-# Handler untuk mendapatkan ID pengguna
-@app.on_message(filters.command("id"))
-async def get_user_id(client, message: Message):
-    user_id = message.from_user.id
-    if message.chat.type in ["group", "supergroup"]:
-        chat_id = message.chat.id
-        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>")
-    else:
-        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
-
-# Handler untuk perintah carbon
-@app.on_message(filters.command("carbon") & filters.private)
-async def carbon(client, message: Message):
-    await carbon_func(client, message)
-
-# Tambahkan handler untuk perintah /help dan tombol interaktif
+# Handler untuk perintah /help dan tombol interaktif
 MODUL_DESC = {
     "carbon": "Mengubah kode menjadi gambar dengan /carbon <kode>.",
     "update": "Memperbarui bot dengan /update (Hanya untuk pemilik bot).",
@@ -149,8 +98,18 @@ async def module_callback(client, callback_query: CallbackQuery):
 async def back_to_help_callback(client, callback_query: CallbackQuery):
     await show_modules(client, callback_query)
 
+# Handler untuk perintah carbon
+@app.on_message(filters.command("carbon") & filters.private)
+async def carbon(client, message: Message):
+    await carbon_func(client, message)
+
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
 
 @atexit.register
-def close_aiohttp_sessio
+def close_aiohttp_session():
+    if aiosession:
+        asyncio.run(aiosession.close())
+
+if __name__ == "__main__":
+    app.run()
