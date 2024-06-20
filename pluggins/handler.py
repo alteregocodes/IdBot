@@ -5,12 +5,15 @@ import sys
 import subprocess
 import asyncio
 from io import BytesIO
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from pyrogram.errors import PeerIdInvalid
 from module import *
 
 from config import OWNER_IDS, START_MSG, UPDATE_LOG_FILE
+
+# Impor app dari main
+from main import app
 
 # Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
