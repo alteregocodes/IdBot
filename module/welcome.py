@@ -1,7 +1,7 @@
 # module/welcome.py
 
 from datetime import datetime
-from pyrogram import Client, filters
+from pyrogram import Client
 from pyrogram.types import ChatMemberUpdated
 from .carbon import make_carbon
 
@@ -33,7 +33,8 @@ async def welcome_new_member(client, chat_member_updated: ChatMemberUpdated):
     
     carbon_image.close()
 
-@Client.on_chat_member_updated()
-async def welcome_new_members(client, chat_member_updated: ChatMemberUpdated):
-    if chat_member_updated.new_chat_member and chat_member_updated.new_chat_member.status == "member":
-        await welcome_new_member(client, chat_member_updated)
+def register_handlers(app):
+    @app.on_chat_member_updated()
+    async def welcome_new_members(client, chat_member_updated: ChatMemberUpdated):
+        if chat_member_updated.new_chat_member and chat_member_updated.new_chat_member.status == "member":
+            await welcome_new_member(client, chat_member_updated)
