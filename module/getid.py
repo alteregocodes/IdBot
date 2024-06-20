@@ -16,8 +16,8 @@ def register_handlers(app):
     @app.on_message(filters.command("id"))
     async def get_user_id(client, message: Message):
         user_id = message.from_user.id
+        chat_id = message.chat.id  # Mengambil ID grup dari pesan
         if message.chat.type in ["group", "supergroup"]:
-            chat_id = message.chat.id
             text = f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>"
         else:
             text = f"ID Anda adalah: <code>{user_id}</code>"
