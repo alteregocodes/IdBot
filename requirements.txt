@@ -6,3 +6,5 @@ tgcrypto
 pytgcalls
 yt-dlp
 youtube_dl
+pydub
+SpeechRecognition
