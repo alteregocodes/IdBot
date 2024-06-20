@@ -142,7 +142,7 @@ async def get_user_id(client, message: Message):
 async def carbon_command(client, message: Message):
     await carbon_func(client, message)
 
- @app.on_message(filters.command("tts") & (filters.group | filters.private))
+@app.on_message(filters.command("tts"))
 async def tts_command(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
