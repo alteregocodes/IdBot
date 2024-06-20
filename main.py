@@ -6,7 +6,7 @@ import aiohttp
 import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, InlineQueryResultArticle, InputTextMessageContent
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
 from gtts import gTTS
@@ -178,9 +178,10 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
 @app.on_message(filters.command("help") & filters.private)
 async def help_command(client, message: Message):
     buttons = [
-        [InlineKeyboardButton("TTS", callback_data="help_tts")],
-        [InlineKeyboardButton("Update", callback_data="help_update")],
-        # Tambahkan tombol fitur lainnya di sini
+        [InlineKeyboardButton("Carbon", callback_data="help_carbon"),
+         InlineKeyboardButton("ID", callback_data="help_id")],
+        [InlineKeyboardButton("Update", callback_data="help_update"),
+         InlineKeyboardButton("TTS", callback_data="help_tts")],
         [InlineKeyboardButton("Kembali", callback_data="help_back")]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -188,31 +189,113 @@ async def help_command(client, message: Message):
 
 # Handler untuk callback pada tombol help
 @app.on_callback_query(filters.regex(r"^help_"))
+@app.on_callback_query(filters.regex(r"^help_"))
 async def help_callback(client, callback_query: CallbackQuery):
-    if callback_query.data == "help_tts":
+    if callback_query.data == "help_carbon":
         await callback_query.answer()
-        await client.send_message(callback_query.from_user.id, "ℹ️ **TTS (Text-to-Speech)**\n\nGunakan perintah /tts <teks> untuk mengubah teks menjadi suara.")
+        explanation = "ℹ️ **Carbon**\n\nGunakan perintah /carbon <kode> untuk membuat gambar dari kode yang diberikan."
+        await client.send_message(callback_query.from_user.id, explanation)
+    elif callback_query.data == "help_id":
+        await callback_query.answer()
+        explanation = "ℹ️ **ID**\n\nGunakan perintah /id untuk mendapatkan ID Anda dan ID grup tempat Anda berada."
+        await client.send_message(callback_query.from_user.id, explanation)
     elif callback_query.data == "help_update":
         await callback_query.answer()
-        await client.send_message(callback_query.from_user.id, "ℹ️ **Update**\n\nGunakan perintah /update untuk memperbarui dan memulai ulang bot.")
-    # Tambahkan penanganan untuk fitur lainnya di sini
-    elif callback_query.data == "help_back":
+        explanation = "ℹ️ **Update**\n\nGunakan perintah /update untuk memperbarui dan memulai ulang bot."
+        await client.send_message(callback_query.from_user.id, explanation)
+    elif callback_query.data == "help_tts":
         await callback_query.answer()
-        buttons = [
-            [InlineKeyboardButton("TTS", callback_data="help_tts")],
-            [InlineKeyboardButton("Update", callback_data="help_update")],
-            # Tambahkan tombol fitur lainnya di sini
-            [InlineKeyboardButton("Kembali", callback_data="help_back")]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await callback_query.edit_message_text("Berikut adalah beberapa fitur yang tersedia:", reply_markup=reply_markup)
+        explanation = "ℹ️ **TTS (Text-to-Speech)**\n\nGunakan perintah /tts <teks> untuk mengubah teks menjadi suara."
+        await client.send_message(callback_query.from_user.id, explanation)
+    elif callback_query.data == "help_bahasatts":
+        await callback_query.answer()
+        explanation = "ℹ️ **Set Bahasa TTS**\n\nGunakan perintah /bahasatts untuk mengatur bahasa untuk TTS."
+        await client.send_message(callback_query.from_user.id, explanation)
 
-# Tambahkan handlers lainnya sesuai kebutuhan di sini
+    # Tombol "Kembali" untuk kembali ke daftar modul
+    buttons = [
+        [InlineKeyboardButton("Carbon", callback_data="help_carbon"),
+         InlineKeyboardButton("ID", callback_data="help_id")],
+        [InlineKeyboardButton("Update", callback_data="help_update"),
+         InlineKeyboardButton("TTS", callback_data="help_tts")],
+        [InlineKeyboardButton("Kembali", callback_data="help_back")]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await callback_query.message.edit_reply_markup(reply_markup)
 
-# Tambahkan penanganan untuk Inline Queries, jika diperlukan
+# Handler untuk callback "Kembali"
+@app.on_callback_query(filters.regex(r"^help_back"))
+async def help_back_callback(client, callback_query: CallbackQuery):
+    buttons = [
+        [InlineKeyboardButton("Carbon", callback_data="help_carbon"),
+         InlineKeyboardButton("ID", callback_data="help_id")],
+        [InlineKeyboardButton("Update", callback_data="help_update"),
+         InlineKeyboardButton("TTS", callback_data="help_tts")],
+        [InlineKeyboardButton("Kembali", callback_data="help_back")]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await callback_query.message.edit_text("Berikut adalah beberapa fitur yang tersedia:", reply_markup=reply_markup)
+    await callback_query.answer()  # Memberikan feedback ke pengguna
 
-if __name__ == "__main__":
-    # Menampilkan pesan saat bot dijalankan
-    print("Bot telah dijalankan, apabila butuh bantuan chat @SayaKyu\nManage by @AlteregoNetwork")
-    # Menjalankan bot
-    app.run()
+# Handler untuk perintah Carbon (/carbon)
+@app.on_message(filters.command("carbon") & filters.private)
+async def carbon_command(client, message: Message):
+    await carbon_func(client, message)
+
+# Handler untuk perintah ID (/id)
+@app.on_message(filters.command("id") & filters.private)
+async def id_command(client, message: Message):
+    user_id = message.from_user.id
+    if message.chat.type in ["group", "supergroup"]:
+        chat_id = message.chat.id
+        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>\nID Grup ini adalah: <code>{chat_id}</code>")
+    else:
+        await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
+
+# Handler untuk perintah TTS (/tts)
+@app.on_message(filters.command("tts") & filters.private)
+async def tts_command(client, message: Message):
+    if len(message.command) < 2 and not message.reply_to_message:
+        await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
+        return
+    text = message.reply_to_message.text if message.reply_to_message else message.text.split(None, 1)[1]
+    language = LANG_CODES.get(message.from_user.id, DEFAULT_LANG)
+    tts = gTTS(text, lang=language)
+    tts.save("output.ogg")
+    try:
+        await client.send_voice(message.chat.id, voice="output.ogg")
+        await message.delete()
+    except Exception as e:
+        await message.reply_text(f"Error: {e}")
+    finally:
+        os.remove("output.ogg")
+
+# Handler untuk perintah setting bahasa TTS (/bahasatts)
+@app.on_message(filters.command("bahasatts") & filters.private)
+async def set_tts_language(client, message: Message):
+    buttons = []
+    for lang, code in LANG_CODES.items():
+        buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
+
+# Handler untuk callback setting bahasa TTS
+@app.on_callback_query(filters.regex(r"^set_lang_"))
+async def set_tts_language_callback(client, callback_query: CallbackQuery):
+    language_code = callback_query.data.split("_")[2]
+    LANG_CODES[callback_query.from_user.id] = language_code
+    await callback_query.answer(f"Bahasa TTS diatur ke {language_code}")
+
+# Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
+import atexit
+
+@atexit.register
+def close_aiohttp_session():
+    if aiosession:
+        asyncio.run(aiosession.close())
+
+# Menampilkan pesan saat bot dijalankan
+print("Bot telah dijalankan, apabila butuh bantuan chat @SayaKyu\nManage by @AlteregoNetwork")
+
+# Menjalankan bot
+app.run()
