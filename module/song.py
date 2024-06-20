@@ -3,7 +3,6 @@ from pyrogram.types import Message
 import yt_dlp as youtube_dl
 import os
 import logging
-import time
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -32,24 +31,25 @@ def register_handlers(app):
         }
 
         try:
+            # Menyimpan daftar file yang ada sebelum unduhan
+            files_before = set(os.listdir("downloads"))
+
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(query, download=True)
-                # Memeriksa file di folder downloads
-                files_before = set(os.listdir("downloads"))
-                base, ext = os.path.splitext(ydl.prepare_filename(info_dict))
-                audio_file = f"{base}.mp3"
+            
+            # Menemukan file baru yang diunduh
+            files_after = set(os.listdir("downloads"))
+            new_files = files_after - files_before
+            new_file = list(new_files)[0] if new_files else None
 
-                # Memastikan file telah dibuat
-                time.sleep(1)
-                files_after = set(os.listdir("downloads"))
-                new_files = files_after - files_before
-
-                if audio_file in new_files:
-                    await message.reply_audio(audio_file, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
-                    os.remove(audio_file)
-                else:
-                    logger.error(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {new_files}")
-                    await message.reply_text(f"File audio tidak ditemukan setelah diunduh. Path: {audio_file} atau {new_files}")
+            if new_file:
+                audio_file_path = os.path.join("downloads", new_file)
+                logger.info(f"Newly downloaded file: {audio_file_path}")
+                await message.reply_audio(audio_file_path, title=info_dict.get('title', 'Unknown'), performer=info_dict.get('uploader', 'Unknown'))
+                os.remove(audio_file_path)
+            else:
+                await message.reply_text("File audio tidak ditemukan setelah diunduh.")
+                logger.error("File audio tidak ditemukan setelah diunduh.")
         except Exception as e:
             logger.error(f"Terjadi kesalahan: {e}")
             await message.reply_text(f"Terjadi kesalahan: {e}")
@@ -71,19 +71,25 @@ def register_handlers(app):
         }
 
         try:
+            # Menyimpan daftar file yang ada sebelum unduhan
+            files_before = set(os.listdir("downloads"))
+
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(query, download=True)
-                video_file = ydl.prepare_filename(info_dict)
 
-                logger.info(f"Downloaded video file: {video_file}")
+            # Menemukan file baru yang diunduh
+            files_after = set(os.listdir("downloads"))
+            new_files = files_after - files_before
+            new_file = list(new_files)[0] if new_files else None
 
-                # Memastikan file video ada
-                if os.path.exists(video_file):
-                    await message.reply_video(video_file, caption=info_dict.get('title', 'Unknown'))
-                    os.remove(video_file)
-                else:
-                    logger.error(f"File video tidak ditemukan setelah diunduh. Path: {video_file}")
-                    await message.reply_text(f"File video tidak ditemukan setelah diunduh. Path: {video_file}")
+            if new_file:
+                video_file_path = os.path.join("downloads", new_file)
+                logger.info(f"Newly downloaded video file: {video_file_path}")
+                await message.reply_video(video_file_path, caption=info_dict.get('title', 'Unknown'))
+                os.remove(video_file_path)
+            else:
+                await message.reply_text("File video tidak ditemukan setelah diunduh.")
+                logger.error("File video tidak ditemukan setelah diunduh.")
         except Exception as e:
             logger.error(f"Terjadi kesalahan: {e}")
             await message.reply_text(f"Terjadi kesalahan: {e}")
