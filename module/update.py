@@ -15,12 +15,15 @@ app = Client("update_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN
 @app.on_message(filters.command("update") & filters.user(OWNER_IDS))
 async def update(client, message):
     try:
+        logger.info(f"Received /update command from user: {message.from_user.id}")
+
         # Run git pull to update the code
         process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
         if process.returncode != 0:
             await message.reply_text(f"Terjadi kesalahan saat melakukan git pull:\n{stderr.decode('utf-8')}")
+            logger.error(f"Error during git pull: {stderr.decode('utf-8')}")
             return
 
         # Read update log file if exists
@@ -45,9 +48,8 @@ async def update(client, message):
         else:
             await client.send_message(message.from_user.id, "Tidak ada perubahan baru yang dicatat.")
 
+        logger.info("Bot successfully updated and restarted.")
+
     except Exception as e:
         logger.error(f"Error during update: {e}")
         await message.reply_text("Terjadi kesalahan saat melakukan pembaruan.")
-
-if __name__ == "__main__":
-    app.run()
