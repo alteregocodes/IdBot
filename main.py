@@ -9,7 +9,7 @@ from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG
 from pyrogram.errors import PeerIdInvalid
 from module import *
 
-app = Client("channel_id_bot", api_id=API_ID, api_hash=api_hash, bot_token=BOT_TOKEN)
+app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
@@ -119,37 +119,18 @@ async def carbon_command(client, message: Message):
 
 # Handler untuk perintah TTS (/tts)
 @app.on_message(filters.command("tts") & filters.private)
-async def tts_command(client, message: Message):
-    if len(message.command) < 2 and not message.reply_to_message:
-        await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
-        return
-    text = message.reply_to_message.text if message.reply_to_message else message.text.split(None, 1)[1]
-    language = get_lang_code(message.from_user.id)
-    output_file = text_to_speech(text, language)
-    try:
-        await client.send_voice(message.chat.id, voice=output_file)
-        await message.delete()
-    except Exception as e:
-        await message.reply_text(f"Error: {e}")
-    finally:
-        remove_output_file(output_file)
+async def tts_command_handler(client, message: Message):
+    await tts_command(client, message)
 
 # Handler untuk perintah setting bahasa TTS (/bahasatts)
 @app.on_message(filters.command("bahasatts") & filters.private)
-async def set_tts_language(client, message: Message):
-    buttons = []
-    for lang, code in LANG_CODES.items():
-        buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
-    reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
+async def set_tts_language_handler(client, message: Message):
+    await set_tts_language(client, message)
 
 # Handler untuk callback setting bahasa TTS
 @app.on_callback_query(filters.regex(r"^set_lang_"))
-async def set_tts_language_callback(client, callback_query: CallbackQuery):
-    language_code = callback_query.data.split("_")[2]
-    set_lang_preference(callback_query.from_user.id, language_code)
-    language_name = get_lang_name(language_code)
-    await callback_query.answer(f"Bahasa TTS diatur ke {language_name}")
+async def set_tts_language_callback_handler(client, callback_query: CallbackQuery):
+    await set_tts_language_callback(client, callback_query)
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
@@ -160,7 +141,8 @@ def close_aiohttp_session():
         asyncio.run(aiosession.close())
 
 # Menampilkan pesan saat bot dijalankan
-print("Bot telah dijalankan, apabila butuh bantuan chat @SayaKyu\nManage by @AlteregoNetwork")
+print("Bot telah dijalankan, apabila butuh bantuan chat @SayaK
+yu\nManage by @AlteregoNetwork")
 
 # Menjalankan bot
 app.run()
