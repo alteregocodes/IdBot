@@ -1,5 +1,3 @@
-# main.py
-
 import os
 import sys
 import subprocess
@@ -11,7 +9,7 @@ from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG
 from pyrogram.errors import PeerIdInvalid
 from module import *
 
-app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+app = Client("channel_id_bot", api_id=API_ID, api_hash=api_hash, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
@@ -150,7 +148,8 @@ async def set_tts_language(client, message: Message):
 async def set_tts_language_callback(client, callback_query: CallbackQuery):
     language_code = callback_query.data.split("_")[2]
     set_lang_preference(callback_query.from_user.id, language_code)
-    await callback_query.answer(f"Bahasa TTS diatur ke {language_code}")
+    language_name = get_lang_name(language_code)
+    await callback_query.answer(f"Bahasa TTS diatur ke {language_name}")
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
