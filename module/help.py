@@ -10,6 +10,8 @@ Daftar Perintah yang Tersedia:
 /bahasatts - Mengatur bahasa untuk Text-to-Speech (TTS).
 /id - Menampilkan ID Anda dan ID grup (jika di grup).
 /carbon <kode> - Membuat gambar "carbon" dari kode yang diberikan.
+/song <judul lagu/tautan YouTube> - Mengunduh dan mengirim file audio dari lagu atau tautan YouTube.
+/vsong <judul video/tautan YouTube> - Mengunduh dan mengirim file video dari video atau tautan YouTube.
 Cara Mendapatkan ID Channel/Grup:
 Forward pesan dari channel/grup ke bot ini, atau gunakan perintah /id jika di dalamnya.
 """
@@ -17,4 +19,4 @@ Forward pesan dari channel/grup ke bot ini, atau gunakan perintah /id jika di da
 def register_handlers(app):
     @app.on_message(filters.command("help"))
     async def help_command(client, message: Message):
-        await message.reply_text(HELP_TEXT)
+        await message.reply_text(HELP_TEXT, parse_mode="markdown")
