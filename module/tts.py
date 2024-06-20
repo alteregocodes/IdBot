@@ -2,6 +2,7 @@
 
 import os
 import json
+import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from .tts_utils import text_to_speech, get_lang_code, set_lang_preference, get_lang_name, LANG_CODES
