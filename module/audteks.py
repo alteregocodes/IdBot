@@ -16,7 +16,6 @@ def register_handlers(app):
     @app.on_message(filters.command("uteks"))
     async def audio_to_text(client, message: Message):
         if message.reply_to_message and hasattr(message.reply_to_message, 'voice'):
-            file_id = message.reply_to_message.voice.file_id
             try:
                 # Download the voice message
                 voice_msg = await client.get_messages(message.chat.id, message_ids=message.reply_to_message.message_id)
