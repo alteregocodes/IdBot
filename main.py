@@ -115,12 +115,12 @@ async def get_user_id(client, message: Message):
         await message.reply_text(f"ID Anda adalah: <code>{user_id}</code>")
 
 # Handler untuk perintah Carbon (/carbon)
-@app.on_message(filters.command("carbon") & filters.private)
+@app.on_message(filters.command("carbon") & (filters.group | filters.private))
 async def carbon_command(client, message: Message):
     await carbon_func(client, message)
 
 # Handler untuk perintah TTS (/tts)
-@app.on_message(filters.command("tts") & filters.private)
+@app.on_message(filters.command("tts") & (filters.group | filters.private))
 async def tts_command(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
@@ -139,7 +139,7 @@ async def tts_command(client, message: Message):
         remove_output_file(output_file)
 
 # Handler untuk perintah setting bahasa TTS (/bahasatts)
-@app.on_message(filters.command("bahasatts") & filters.private)
+@app.on_message(filters.command("bahasatts") & (filters.group | filters.private))
 async def set_tts_language(client, message: Message):
     buttons = []
     for lang, code in LANG_CODES.items():
@@ -154,6 +154,12 @@ async def set_tts_language_callback(client, callback_query: CallbackQuery):
     set_lang_preference(callback_query.from_user.id, language_code)
     language_name = get_lang_name(language_code)
     await callback_query.answer(f"Bahasa TTS diatur ke {language_name}")
+
+# Handler untuk memulai bot di grup
+@app.on_message(filters.command("start") & filters.group)
+async def start_group(client, message: Message):
+    await message.reply_text("Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan.")
+    
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
