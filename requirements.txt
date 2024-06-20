@@ -1,3 +1,5 @@
 aiohttp
 pyrogram
 gtts
+youtubesearchpython
+wget
