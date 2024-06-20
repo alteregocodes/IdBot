@@ -3,7 +3,7 @@
 import subprocess
 import asyncio
 import logging
-from pyrogram import Client
+from pyrogram import Client, filters  # Import filters from pyrogram
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, UPDATE_LOG_FILE
 
 # Setup logging
@@ -54,6 +54,3 @@ async def run_update():
 async def update_command(client, message):
     result = await run_update()
     await message.reply_text(result)
-
-# No app.run() here, as we'll run the Client in __init__.py
-
