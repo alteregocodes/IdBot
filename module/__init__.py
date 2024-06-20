@@ -7,7 +7,7 @@ from .welcome import register_handlers as register_welcome_handlers
 from .tts import register_handlers as register_tts_handlers
 from .help import register_handlers as register_help_handlers
 from .song import register_handlers as register_song_handlers
-from .audteks import register_handlers as register_audteks_handlers
+from .audteks import voice_handler, language_buttons
 
 def register_all_handlers(app):
     register_carbon_handlers(app)
