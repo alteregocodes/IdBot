@@ -9,7 +9,7 @@ def register_handlers(app):
         if message.forward_from_chat:
             chat_id = message.forward_from_chat.id
             chat_id_formatted = f"<code>-{abs(chat_id)}</code>" if chat_id < 0 else str(chat_id)
-            await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}")
+            await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}", parse_mode="markdownv2")
         else:
             await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
 
@@ -22,4 +22,4 @@ def register_handlers(app):
         else:
             text = f"ID Anda adalah: <code>{user_id}</code>"
         
-        await message.reply_text(text, parse_mode="markdown")
+        await message.reply_text(text, parse_mode="markdownv2")
