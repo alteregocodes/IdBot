@@ -17,4 +17,4 @@ Forward pesan dari channel/grup ke bot ini, atau gunakan perintah /id jika di da
 def register_handlers(app):
     @app.on_message(filters.command("help"))
     async def help_command(client, message: Message):
-        await message.reply_text(HELP_TEXT, parse_mode="markdown")
+        await message.reply_text(HELP_TEXT)
