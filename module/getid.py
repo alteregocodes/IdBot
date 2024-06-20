@@ -1,5 +1,3 @@
-# module/getid.py
-
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
@@ -24,10 +22,10 @@ def register_handlers(app):
         # Log tambahan
         try:
             if message.chat.type in ["group", "supergroup"]:
-                text = f"ID Anda adalah: {user_id}\nID Grup ini adalah: {chat_id}"
+                text = f"ID Anda adalah: `{user_id}`\nID Grup ini adalah: `{chat_id}`"
             else:
-                text = f"ID Anda adalah: {user_id}"
+                text = f"ID Anda adalah: `{user_id}`"
             
-            await message.reply_text(text)
+            await message.reply_text(text, parse_mode="markdown")
         except Exception as e:
             print(f"Error sending message: {e}")
