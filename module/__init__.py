@@ -1,14 +1,14 @@
 # module/__init__.py
 
-from .carbon import *
-from .start import *
-from .getid import *
-from .welcome import *
-from .tts import *
+from .carbon import register_handlers as register_carbon_handlers
+from .start import register_handlers as register_start_handlers
+from .getid import register_handlers as register_getid_handlers
+from .welcome import register_handlers as register_welcome_handlers
+from .tts import register_handlers as register_tts_handlers
 
 def register_all_handlers(app):
-    carbon_register_handlers(app)
-    start_register_handlers(app)
-    getid_register_handlers(app)
-    welcome_register_handlers(app)
-    tts_register_handlers(app)
+    register_carbon_handlers(app)
+    register_start_handlers(app)
+    register_getid_handlers(app)
+    register_welcome_handlers(app)
+    register_tts_handlers(app)
