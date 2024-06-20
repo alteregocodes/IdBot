@@ -18,6 +18,9 @@ def register_handlers(app):
         user_id = message.from_user.id
         chat_id = message.chat.id  # Mendapatkan ID chat tempat perintah diterima
 
+        # Debugging output untuk memastikan chat_id diambil dengan benar
+        print(f"User ID: {user_id}, Chat ID: {chat_id}, Chat Type: {message.chat.type}")
+
         if message.chat.type in ["group", "supergroup"]:
             text = f"ID Anda adalah: {user_id}\nID Grup ini adalah: {chat_id}"
         else:
