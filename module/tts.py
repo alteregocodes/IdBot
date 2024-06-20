@@ -31,15 +31,15 @@ def text_to_speech(text, language):
 def get_lang_code(user_id):
     return USER_LANG_PREFS.get(user_id, DEFAULT_LANG)
 
+def get_lang_name(language_code):
+    for lang, code in LANG_CODES.items():
+        if code == language_code:
+            return lang
+    return "Unknown"
+
 def set_lang_preference(user_id, language_code):
     USER_LANG_PREFS[user_id] = language_code
 
 def remove_output_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
-
-def get_lang_name(language_code):
-    for lang, code in LANG_CODES.items():
-        if code == language_code:
-            return lang
-    return "Unknown"
