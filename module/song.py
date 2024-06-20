@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-import youtube_dl
+import yt_dlp as youtube_dl
 import os
 
 def register_handlers(app):
