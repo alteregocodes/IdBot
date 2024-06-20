@@ -6,14 +6,36 @@ import aiohttp
 import asyncio
 from io import BytesIO
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery  # Tambahkan CallbackQuery di sini
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, InlineQueryResultArticle, InputTextMessageContent
 from config import API_ID, API_HASH, BOT_TOKEN, OWNER_IDS, START_MSG, UPDATE_LOG_FILE
 from pyrogram.errors import PeerIdInvalid
+from gtts import gTTS
+from gpytranslate import Translator
 
 app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Inisialisasi sesi aiohttp.ClientSession
 aiosession = None
+
+# Daftar kode bahasa untuk Google TTS
+LANG_CODES = {
+    "Afrikaans": "af",
+    "Albanian": "sq",
+    "Amharic": "am",
+    "Arabic": "ar",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Sundanese": "su",
+    "Thai": "th",
+    "Filipino": "fil",
+    # Tambahkan bahasa lain sesuai kebutuhan
+}
+
+# Default bahasa TTS
+DEFAULT_LANG = "en"  # Bahasa Inggris sebagai default
+
+# Inisialisasi translator untuk gpytranslate
+translator = Translator()
 
 async def init_aiosession():
     global aiosession
@@ -118,49 +140,39 @@ async def get_user_id(client, message: Message):
 async def carbon(client, message: Message):
     await carbon_func(client, message)
 
-# Tambahkan handler untuk perintah /help dan tombol interaktif
-MODUL_DESC = {
-    "carbon": "Mengubah kode menjadi gambar dengan /carbon <kode>.",
-    "update": "Memperbarui bot dengan /update (Hanya untuk pemilik bot).",
-    "id": "Mendapatkan ID pengguna dan grup dengan /id.",
-}
+# Handler untuk perintah TTS (/tts)
+@app.on_message(filters.command("tts") & filters.private)
+async def tts_command(client, message: Message):
+    if len(message.command) < 2 and not message.reply_to_message:
+        await message.reply("Silakan berikan teks yang ingin diubah menjadi suara.")
+        return
+    text = message.reply_to_message.text if message.reply_to_message else message.text.split(None, 1)[1]
+    language = LANG_CODES.get(client._translate[client.me.id]["negara"], DEFAULT_LANG)
+    tts = gTTS(text, lang=language)
+    tts.save("output.ogg")
+    try:
+        await client.send_voice(message.chat.id, voice="output.ogg", reply_to_message_id=message.message_id)
+        await message.delete()
+    except Exception as e:
+        await message.reply_text(f"Error: {e}")
+    finally:
+        os.remove("output.ogg")
 
-# Fungsi untuk menampilkan daftar modul
-async def show_modules(client, message_or_callback):
+# Handler untuk perintah setting bahasa TTS (/bahasatts)
+@app.on_message(filters.command("bahasatts") & filters.private)
+async def set_tts_language(client, message: Message):
     buttons = []
-    row = []
-    for idx, name in enumerate(MODUL_DESC):
-        row.append(InlineKeyboardButton(name, callback_data=f"mod_{name}"))
-        if (idx + 1) % 2 == 0 or idx == len(MODUL_DESC) - 1:
-            buttons.append(row)
-            row = []
+    for lang, code in LANG_CODES.items():
+        buttons.append([InlineKeyboardButton(lang, callback_data=f"set_lang_{code}")])
     reply_markup = InlineKeyboardMarkup(buttons)
-    text = "Berikut adalah beberapa fitur yang tersedia:"
-    if isinstance(message_or_callback, Message):
-        await message_or_callback.reply_text(text, reply_markup=reply_markup)
-    elif isinstance(message_or_callback, CallbackQuery):
-        await message_or_callback.message.edit(text, reply_markup=reply_markup)
+    await message.reply_text("Pilih bahasa untuk TTS:", reply_markup=reply_markup)
 
-# Handler untuk perintah /help
-@app.on_message(filters.command("help") & filters.private)
-async def help_command(client, message: Message):
-    await show_modules(client, message)
-
-# Handler untuk tombol modul
-@app.on_callback_query(filters.regex(r"^mod_"))
-async def module_callback(client, callback_query: CallbackQuery):
-    mod_name = callback_query.data.split("_")[1]
-    mod_desc = MODUL_DESC.get(mod_name, "Modul tidak ditemukan.")
-    
-    buttons = [[InlineKeyboardButton("Kembali", callback_data="back_to_help")]]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    
-    await callback_query.message.edit_text(mod_desc, reply_markup=reply_markup)
-
-# Handler untuk tombol Kembali
-@app.on_callback_query(filters.regex(r"^back_to_help$"))
-async def back_to_help_callback(client, callback_query: CallbackQuery):
-    await show_modules(client, callback_query)
+# Handler untuk callback setting bahasa TTS
+@app.on_callback_query(filters.regex(r"^set_lang_"))
+async def set_tts_language_callback(client, callback_query: CallbackQuery):
+    language_code = callback_query.data.split("_")[2]
+    client._translate[client.me.id]["negara"] = language_code
+    await callback_query.answer(f"Bahasa TTS diatur ke {language_code}")
 
 # Tambahkan penanganan untuk menutup sesi saat aplikasi berhenti
 import atexit
