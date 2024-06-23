@@ -3,22 +3,18 @@
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-API_ID = None  # Replace with your API ID
-API_HASH = None  # Replace with your API Hash
-
 async def get_api_id_hash(phone_number: str, otp: str, password: str = None):
-    client = TelegramClient(StringSession(), API_ID, API_HASH)
-
-    await client.connect()
-    if not await client.is_user_authorized():
-        await client.send_code_request(phone_number)
+    async with TelegramClient(StringSession(), None, None) as client:
+        await client.connect()
         try:
-            await client.sign_in(phone_number, otp, password=password)
+            await client.send_code_request(phone_number)
+            if password:
+                await client.sign_in(phone_number, otp, password=password)
+            else:
+                await client.sign_in(phone_number, otp)
+            
+            me = await client.get_me()
+            return client.api_id, client.api_hash
         except Exception as e:
             print(f"Error during sign in: {e}")
             return None, None
-
-    me = await client.get_me()
-    await client.disconnect()
-    return API_ID, API_HASH
-  
