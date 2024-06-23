@@ -5,7 +5,6 @@ from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, 
 from .telegram_login import get_api_id_hash
 import logging
 
-# Konfigurasikan logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -45,8 +44,6 @@ def register_handlers(app):
                 await handle_phone_number(client, message)
             elif state == "awaiting_otp":
                 await handle_otp(client, message)
-            elif state == "awaiting_password":
-                await handle_password(client, message)
 
 async def handle_phone_number(client, message: Message):
     phone_number = message.text
@@ -57,23 +54,14 @@ async def handle_phone_number(client, message: Message):
 async def handle_otp(client, message: Message):
     otp = message.text
     user_state = states[message.from_user.id]
-    user_state["otp"] = otp
-    user_state["state"] = "awaiting_password"
-    await message.reply_text("Terima kasih, sekarang masukkan kata sandi (jika ada):")
-    logger.info("Kode OTP diterima: %s", otp)
-
-async def handle_password(client, message: Message):
-    password = message.text
-    user_state = states[message.from_user.id]
     phone_number = user_state["phone_number"]
-    otp = user_state["otp"]
 
     logger.info("Memulai proses mendapatkan API ID dan API Hash")
-    api_id, api_hash = await get_api_id_hash(phone_number, otp, password)
+    api_id, api_hash, error = await get_api_id_hash(phone_number, otp)
     if api_id and api_hash:
         await message.reply_text(f"API ID: {api_id}\nAPI Hash: {api_hash}")
     else:
-        await message.reply_text("Gagal mendapatkan API ID dan API Hash. Silakan coba lagi.")
-        logger.error("Gagal mendapatkan API ID dan API Hash untuk nomor %s", phone_number)
+        await message.reply_text(f"Gagal mendapatkan API ID dan API Hash. Kesalahan: {error}")
+        logger.error("Gagal mendapatkan API ID dan API Hash untuk nomor %s: %s", phone_number, error)
     
     del states[message.from_user.id]
