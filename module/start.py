@@ -6,6 +6,7 @@ import asyncio
 from .telegram_login import get_api_id_hash
 
 START_MSG = "Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan."
+states = {}
 
 def register_handlers(app):
     @app.on_message(filters.command("start") & filters.private)
@@ -28,22 +29,43 @@ def register_handlers(app):
     @app.on_callback_query(filters.regex("get_api"))
     async def get_api(client, callback_query: CallbackQuery):
         await callback_query.message.reply_text("Silakan masukkan nomor akun Telegram Anda:")
-        app.listen(callback_query.message.chat.id, handle_phone_number)
+        states[callback_query.from_user.id] = "awaiting_phone_number"
+
+    @app.on_message(filters.private)
+    async def handle_message(client, message: Message):
+        user_id = message.from_user.id
+        if user_id in states:
+            state = states[user_id]
+
+            if state == "awaiting_phone_number":
+                await handle_phone_number(client, message)
+            elif state == "awaiting_otp":
+                await handle_otp(client, message)
+            elif state == "awaiting_password":
+                await handle_password(client, message)
 
 async def handle_phone_number(client, message: Message):
     phone_number = message.text
+    states[message.from_user.id] = {"state": "awaiting_otp", "phone_number": phone_number}
     await message.reply_text("Terima kasih, sekarang masukkan kode OTP yang dikirimkan Telegram:")
-    client.listen(message.chat.id, lambda m: handle_otp(client, m, phone_number))
 
-async def handle_otp(client, message: Message, phone_number: str):
+async def handle_otp(client, message: Message):
     otp = message.text
+    user_state = states[message.from_user.id]
+    user_state["otp"] = otp
+    user_state["state"] = "awaiting_password"
     await message.reply_text("Terima kasih, sekarang masukkan kata sandi (jika ada):")
-    client.listen(message.chat.id, lambda m: handle_password(client, m, phone_number, otp))
 
-async def handle_password(client, message: Message, phone_number: str, otp: str):
+async def handle_password(client, message: Message):
     password = message.text
+    user_state = states[message.from_user.id]
+    phone_number = user_state["phone_number"]
+    otp = user_state["otp"]
+
     api_id, api_hash = await get_api_id_hash(phone_number, otp, password)
     if api_id and api_hash:
         await message.reply_text(f"API ID: {api_id}\nAPI Hash: {api_hash}")
     else:
         await message.reply_text("Gagal mendapatkan API ID dan API Hash. Silakan coba lagi.")
+    
+    del states[message.from_user.id]
