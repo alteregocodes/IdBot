@@ -1,5 +1,3 @@
-berikut kode
-
 # module/start.py
 
 from pyrogram import Client, filters
