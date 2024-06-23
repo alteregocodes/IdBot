@@ -2,7 +2,8 @@
 
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-from .telegram_login import handle_phone_number
+import asyncio
+from .telegram_login import get_api_id_hash
 
 START_MSG = "Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan."
 
@@ -27,7 +28,7 @@ def register_handlers(app):
     @app.on_callback_query(filters.regex("get_api"))
     async def get_api(client, callback_query: CallbackQuery):
         await callback_query.message.reply_text("Silakan masukkan nomor akun Telegram Anda:")
-        client.listen(callback_query.message.chat.id, handle_phone_number)
+        app.listen(callback_query.message.chat.id, handle_phone_number)
 
 async def handle_phone_number(client, message: Message):
     phone_number = message.text
@@ -41,7 +42,7 @@ async def handle_otp(client, message: Message, phone_number: str):
 
 async def handle_password(client, message: Message, phone_number: str, otp: str):
     password = message.text
-    api_id, api_hash = await telegram_login.get_api_id_hash(phone_number, otp, password)
+    api_id, api_hash = await get_api_id_hash(phone_number, otp, password)
     if api_id and api_hash:
         await message.reply_text(f"API ID: {api_id}\nAPI Hash: {api_hash}")
     else:
