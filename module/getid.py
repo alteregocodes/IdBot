@@ -7,7 +7,7 @@ def register_handlers(app):
         if message.forward_from_chat:
             chat_id = message.forward_from_chat.id
             chat_id_formatted = f"-{abs(chat_id)}" if chat_id < 0 else str(chat_id)
-            await message.reply_text(f"ID Channel/Grup: {chat_id_formatted}")
+            await message.reply_text(f"ID Channel/Grup: <code>{chat_id_formatted}</code>")
         else:
             await message.reply_text("Pesan ini tidak berasal dari channel atau grup.")
 
