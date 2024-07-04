@@ -9,3 +9,4 @@ MONGO_URI = ""
 
 START_MSG = "Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan."
 UPDATE_LOG_FILE = "update_log.txt"  # Nama file log pembaruan sementara
+BLACKLIST_FILE = "blacklist.txt"  # File untuk menyimpan nama-nama yang di-blacklist (tidak diperlukan lagi, tapi bisa disimpan untuk backup)
