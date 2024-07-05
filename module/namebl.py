@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.errors import UserAdminInvalid
 import config
-from ..database import Database
+from database import Database
 
 db = Database()
 
