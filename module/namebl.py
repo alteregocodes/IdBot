@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.errors import UserAdminInvalid, FloodWait, RPCError
 import config
-from database import Database
+from ..database import Database
 
 db = Database()
 
@@ -46,7 +46,7 @@ def register_handlers(app: Client):
             await check_member_name(client, update.chat.id, update.new_chat_member.user.id)
 
 async def ban_user_from_all_groups(client: Client, user_id: int):
-    async for dialog in client.get_chat_members(chat_id):
+    async for dialog in client.get_dialogs():
         if dialog.chat.type in ["group", "supergroup"] and dialog.chat.permissions.can_restrict_members:
             try:
                 await client.ban_chat_member(dialog.chat.id, user_id)
@@ -66,25 +66,25 @@ async def monitor_groups_for_blacklist(client: Client):
         print(f"Loaded blacklist: {blacklist}")  # Debugging log
         
         # Mengambil daftar semua grup di mana bot adalah admin
-        async for chat in client.get_chat_list():
-            if chat.type in ["group", "supergroup"]:
-                async for member in client.get_chat_members(chat.id):
+        async for chat in client.get_dialogs():
+            if chat.chat.type in ["group", "supergroup"] and chat.chat.permissions.can_restrict_members:
+                async for member in client.get_chat_members(chat.chat.id):
                     member_name = (member.user.first_name + " " + member.user.last_name).lower() if member.user.last_name else member.user.first_name.lower()
-                    print(f"Checking member: {member_name} in group {chat.title}")  # Debug log for member names in groups
+                    print(f"Checking member: {member_name} in group {chat.chat.title}")  # Debug log for member names in groups
                     for blacklisted_name in blacklist:
                         if blacklisted_name in member_name:
                             try:
-                                await client.ban_chat_member(chat.id, member.user.id)
-                                print(f"Banned user {member.user.first_name} ({member.user.id}) from {chat.title} because their name contains a blacklisted term.")
+                                await client.ban_chat_member(chat.chat.id, member.user.id)
+                                print(f"Banned user {member.user.first_name} ({member.user.id}) from {chat.chat.title} because their name contains a blacklisted term.")
                             except UserAdminInvalid:
-                                print(f"Bot is not an admin in {chat.title}")
+                                print(f"Bot is not an admin in {chat.chat.title}")
                             except FloodWait as e:
                                 print(f"Flood wait: {e.x} seconds")
                                 await asyncio.sleep(e.x)
                             except RPCError as e:
                                 print(f"RPC Error: {e}")
                             except Exception as e:
-                                print(f"Error banning user {member.user.id} from {chat.title}: {e}")
+                                print(f"Error banning user {member.user.id} from {chat.chat.title}: {e}")
                             break  # Tidak perlu memeriksa nama yang lain jika sudah match
         await asyncio.sleep(5)  # Tunggu 5 detik sebelum memeriksa lagi
 
