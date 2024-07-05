@@ -10,11 +10,13 @@ def register_handlers(app: Client):
     @app.on_message(filters.new_chat_members)
     async def check_new_members(client, message):
         blacklist = db.load_blacklist()
+        blacklist = [name.lower() for name in blacklist]  # Convert all blacklisted names to lowercase
         new_members = message.new_chat_members
         for member in new_members:
+            member_name = member.first_name.lower() if member.first_name else ""
             # Periksa apakah nama member mengandung kata yang di-blacklist
             for blacklisted_name in blacklist:
-                if blacklisted_name in member.first_name.lower():
+                if blacklisted_name in member_name:
                     try:
                         await ban_user_from_all_groups(client, member.id)
                         await message.reply_text(f"User {member.mention} telah di-ban dari semua grup karena namanya mengandung kata yang di-blacklist.")
@@ -43,11 +45,13 @@ async def ban_user_from_all_groups(client: Client, user_id: int):
 async def monitor_groups_for_blacklist(client: Client):
     while True:
         blacklist = db.load_blacklist()
+        blacklist = [name.lower() for name in blacklist]  # Convert all blacklisted names to lowercase
         async for dialog in client.iter_dialogs():
             if dialog.chat.type in ["group", "supergroup"] and dialog.chat.permissions.can_restrict_members:
                 async for member in client.iter_chat_members(dialog.chat.id):
+                    member_name = member.user.first_name.lower() if member.user.first_name else ""
                     for blacklisted_name in blacklist:
-                        if blacklisted_name in member.user.first_name.lower():
+                        if blacklisted_name in member_name:
                             try:
                                 await client.ban_chat_member(dialog.chat.id, member.user.id)
                                 print(f"User {member.user.first_name} telah di-ban dari {dialog.chat.title} karena namanya mengandung kata yang di-blacklist.")
