@@ -40,7 +40,7 @@ def register_handlers(app: Client):
             await message.reply_text("Gunakan perintah dengan format: /addblacklist [nama]")
 
 async def ban_user_from_all_groups(client: Client, user_id: int):
-    async for dialog in client.iter_dialogs():
+    async for dialog in client.get_dialogs():
         if dialog.chat.type in ["group", "supergroup"] and dialog.chat.permissions.can_restrict_members:
             try:
                 await client.ban_chat_member(dialog.chat.id, user_id)
@@ -58,10 +58,10 @@ async def monitor_groups_for_blacklist(client: Client):
         blacklist = db.load_blacklist()
         blacklist = [name.lower() for name in blacklist]  # Convert all blacklisted names to lowercase
         print(f"Loaded blacklist: {blacklist}")  # Debugging log
-        async for dialog in client.iter_dialogs():
+        async for dialog in client.get_dialogs():
             if dialog.chat.type in ["group", "supergroup"] and dialog.chat.permissions.can_restrict_members:
                 print(f"Checking group: {dialog.chat.title}")  # Debugging log
-                async for member in client.iter_chat_members(dialog.chat.id):
+                async for member in client.get_chat_members(dialog.chat.id):
                     member_name = (member.user.first_name + " " + member.user.last_name).lower() if member.user.last_name else member.user.first_name.lower()
                     print(f"Checking member: {member_name} in group {dialog.chat.title}")  # Debug log for member names in groups
                     for blacklisted_name in blacklist:
