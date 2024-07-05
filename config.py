@@ -6,7 +6,7 @@ BOT_TOKEN = "7283082118:AAEmmoOO3UhxIEXgoVGJV2wiiujuOygFz0k"
 
 OWNER_IDS = [7494727691]  # Hanya satu owner ID
 MONGO_URI = "mongodb+srv://reacode:<password>@reamusic.x7hyx2h.mongodb.net/?retryWrites=true&w=majority&appName=reamusic"
-
+DB_NAME = "idbot"
 START_MSG = "Halo! Saya adalah bot yang dapat mengambil ID channel/grup dari pesan yang diteruskan."
 UPDATE_LOG_FILE = "update_log.txt"  # Nama file log pembaruan sementara
 BLACKLIST_FILE = "blacklist.txt"  # File untuk menyimpan nama-nama yang di-blacklist (tidak diperlukan lagi, tapi bisa disimpan untuk backup)
