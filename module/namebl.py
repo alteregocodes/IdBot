@@ -1,9 +1,8 @@
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.errors import UserAdminInvalid
-from pyrogram.types import ChatPermissions
 import config
-from database import Database
+from ..database import Database
 
 db = Database()
 
@@ -32,9 +31,6 @@ def register_handlers(app: Client):
         else:
             await message.reply_text("Gunakan perintah dengan format: /addblacklist [nama]")
 
-    # Tambahkan monitor_groups_for_blacklist ke loop event asyncio
-    app.add_task(monitor_groups_for_blacklist(app))
-
 async def ban_user_from_all_groups(client: Client, user_id: int):
     # Dapatkan daftar semua grup di mana bot adalah admin
     async for dialog in client.iter_dialogs():
@@ -60,8 +56,12 @@ async def monitor_groups_for_blacklist(client: Client):
                             break  # Tidak perlu memeriksa nama yang lain jika sudah match
         await asyncio.sleep(3600)  # Tunggu satu jam sebelum memeriksa lagi
 
-# Contoh penggunaan:
-if __name__ == "__main__":
+async def main():
     app = Client("my_bot", api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN)
     register_handlers(app)
-    app.run()
+
+    async with app:
+        await asyncio.create_task(monitor_groups_for_blacklist(app))
+
+if __name__ == "__main__":
+    asyncio.run(main())
