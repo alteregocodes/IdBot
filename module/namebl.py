@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.errors import UserAdminInvalid, FloodWait, RPCError
 import config
-from database import Database
+from ..database import Database
 
 db = Database()
 
@@ -13,7 +13,8 @@ def register_handlers(app: Client):
         blacklist = [name.lower() for name in blacklist]  # Convert all blacklisted names to lowercase
         new_members = message.new_chat_members
         for member in new_members:
-            member_name = member.first_name.lower() if member.first_name else ""
+            member_name = (member.first_name + " " + member.last_name).lower() if member.last_name else member.first_name.lower()
+            print(f"New member name: {member_name}")  # Debug log for new member names
             # Periksa apakah nama member mengandung kata yang di-blacklist
             for blacklisted_name in blacklist:
                 if blacklisted_name in member_name:
@@ -61,7 +62,8 @@ async def monitor_groups_for_blacklist(client: Client):
             if dialog.chat.type in ["group", "supergroup"] and dialog.chat.permissions.can_restrict_members:
                 print(f"Checking group: {dialog.chat.title}")  # Debugging log
                 async for member in client.iter_chat_members(dialog.chat.id):
-                    member_name = member.user.first_name.lower() if member.user.first_name else ""
+                    member_name = (member.user.first_name + " " + member.user.last_name).lower() if member.user.last_name else member.user.first_name.lower()
+                    print(f"Checking member: {member_name} in group {dialog.chat.title}")  # Debug log for member names in groups
                     for blacklisted_name in blacklist:
                         if blacklisted_name in member_name:
                             try:
@@ -84,7 +86,11 @@ async def main():
     register_handlers(app)
 
     async with app:
-        await monitor_groups_for_blacklist(app)  # Menggunakan await langsung untuk memulai task
+        # Mulai task untuk memantau grup dan memeriksa anggota yang ada
+        asyncio.create_task(monitor_groups_for_blacklist(app))
+
+        # Menunggu perintah dari pengguna atau event dari chat
+        await app.idle()
 
 if __name__ == "__main__":
     asyncio.run(main())
