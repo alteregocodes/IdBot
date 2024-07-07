@@ -1,19 +1,22 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaAnimation
 
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        await message.reply_animation(animation=gif_url, caption="Selamat datang di bot kami!")
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
-        await message.reply("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply("Silakan pilih opsi di bawah ini:", reply_markup=InlineKeyboardMarkup(buttons))
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
-        ask_ques = "**» Pilih Jenis String yang Ingin Dibuat **"
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        await callback_query.message.reply_animation(animation=gif_url, caption="**» Pilih Jenis String yang Ingin Dibuat **")
         buttons_ques = [
             [
                 InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 💗", callback_data="pyrogram"),
@@ -26,13 +29,13 @@ def register_handlers(app: Client):
             ],
             [InlineKeyboardButton("Kembali", callback_data="back_to_start")],
         ]
-        await callback_query.message.edit(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
+        await callback_query.message.edit(reply_markup=InlineKeyboardMarkup(buttons_ques))
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        await callback_query.message.reply_animation(animation=gif_url, caption="**Daftar Perintah:**")
         help_message = """
-**Daftar Perintah:**
-
 /tts <teks> - Mengubah teks menjadi suara dengan bahasa yang dipilih.
 /bahasatts - Mengatur bahasa untuk Text-to-Speech (TTS).
 /id - Menampilkan ID Anda dan ID grup (jika di grup).
@@ -53,9 +56,11 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        await callback_query.message.reply_animation(animation=gif_url, caption="Selamat datang di bot kami!")
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
-        await callback_query.message.edit("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
+        await callback_query.message.edit("Silakan pilih opsi di bawah ini:", reply_markup=InlineKeyboardMarkup(buttons))
