@@ -7,34 +7,21 @@ GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
-        buttons = [
-            [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
-            [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
-             InlineKeyboardButton("Bantuan", callback_data="help")],
-        ]
-        await message.reply("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
-        
-        # Kirim video GIF tanpa caption
-        await client.send_video(message.chat.id, video=GIF_URL)
+        await client.send_animation(
+            chat_id=message.chat.id,
+            animation=GIF_URL,
+            caption="Selamat datang di bot kami!",
+            reply_markup=get_main_buttons()
+        )
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
-        ask_ques = "**» Pilih Jenis String yang Ingin Dibuat **"
-        buttons_ques = [
-            [
-                InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 💗", callback_data="pyrogram"),
-                InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝚅2 💗", callback_data="pyrogram_v2"),
-            ],
-            [InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 💻", callback_data="telethon")],
-            [
-                InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝙱𝙾𝚃 🤖", callback_data="pyrogram_bot"),
-                InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 𝙱𝙾𝚃 🤖", callback_data="telethon_bot"),
-            ],
-        ]
-        await callback_query.message.edit(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
-        
-        # Kirim video GIF tanpa caption
-        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
+        await client.send_animation(
+            chat_id=callback_query.message.chat.id,
+            animation=GIF_URL,
+            caption="**» Pilih Jenis String yang Ingin Dibuat **",
+            reply_markup=get_string_type_buttons()
+        )
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
@@ -56,20 +43,37 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
-        back_button = InlineKeyboardButton("Kembali", callback_data="back_to_start")
-        await callback_query.message.edit(help_message, reply_markup=InlineKeyboardMarkup([[back_button]]))
-
-        # Kirim video GIF tanpa caption
-        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
+        await callback_query.message.edit(help_message, reply_markup=get_back_button())
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        buttons = [
-            [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
-            [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
-             InlineKeyboardButton("Bantuan", callback_data="help")],
-        ]
-        await callback_query.message.edit("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
-        
-        # Kirim video GIF tanpa caption
-        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
+        await client.send_animation(
+            chat_id=callback_query.message.chat.id,
+            animation=GIF_URL,
+            caption="Selamat datang di bot kami!",
+            reply_markup=get_main_buttons()
+        )
+
+def get_main_buttons():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
+        [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
+         InlineKeyboardButton("Bantuan", callback_data="help")],
+    ])
+
+def get_string_type_buttons():
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 💗", callback_data="pyrogram"),
+            InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝚅2 💗", callback_data="pyrogram_v2"),
+        ],
+        [InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 💻", callback_data="telethon")],
+        [
+            InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝙱𝙾𝚃 🤖", callback_data="pyrogram_bot"),
+            InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 𝙱𝙾𝚃 🤖", callback_data="telethon_bot"),
+        ],
+        [get_back_button()]
+    ])
+
+def get_back_button():
+    return InlineKeyboardButton("Kembali", callback_data="back_to_start")
