@@ -46,14 +46,11 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        await client.edit_message_media(
+        await client.send_animation(
             chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id,
-            media=InputMediaAnimation(
-                media=GIF_URL,
-                caption="Selamat datang di bot kami!",
-                reply_markup=get_main_buttons()
-            )
+            animation=GIF_URL,
+            caption="Selamat datang di bot kami!",
+            reply_markup=get_main_buttons()
         )
 
 def get_main_buttons():
