@@ -6,8 +6,8 @@ def register_handlers(app: Client):
     async def start(client, message):
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
-            [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
-             InlineKeyboardButton("Bantuan", callback_data="help")],
+            [InlineKeyboardButton("Bantuan", callback_data="help"), InlineKeyboardButton("Module", callback_data="module")],
+            [InlineKeyboardButton("Ambil String", callback_data="ambil_string")],
         ]
         video_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
         caption = "Selamat datang di bot kami!"
@@ -59,12 +59,48 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
         back_button = InlineKeyboardButton("Kembali", callback_data="back_to_start")
         await callback_query.message.edit(help_message, reply_markup=InlineKeyboardMarkup([[back_button]]))
 
+    @app.on_callback_query(filters.regex("module"))
+    async def handle_module(client, callback_query):
+        module_ques = "**» Pilih Module yang Ingin Anda Gunakan **"
+        buttons_module = [
+            [InlineKeyboardButton("TTS", callback_data="module_tts"), InlineKeyboardButton("Carbon", callback_data="module_carbon")],
+            [InlineKeyboardButton("Song", callback_data="module_song"), InlineKeyboardButton("vSong", callback_data="module_vsong")],
+            [InlineKeyboardButton("Kembali", callback_data="back_to_start")],
+        ]
+        await callback_query.message.edit(module_ques, reply_markup=InlineKeyboardMarkup(buttons_module))
+
+    @app.on_callback_query(filters.regex("^module_"))
+    async def handle_specific_module(client, callback_query):
+        module = callback_query.data.split("_")[1]
+        module_messages = {
+            "tts": """
+**Cara Menggunakan Module TTS:**
+/tts <teks> - Mengubah teks menjadi suara dengan bahasa yang dipilih.
+/bahasatts - Mengatur bahasa untuk Text-to-Speech (TTS).
+""",
+            "carbon": """
+**Cara Menggunakan Module Carbon:**
+/carbon <kode> - Membuat gambar "carbon" dari kode yang diberikan.
+""",
+            "song": """
+**Cara Menggunakan Module Song:**
+/song <judul lagu/tautan YouTube> - Mengunduh dan mengirim file audio dari lagu atau tautan YouTube.
+""",
+            "vsong": """
+**Cara Menggunakan Module vSong:**
+/vsong <judul video/tautan YouTube> - Mengunduh dan mengirim file video dari video atau tautan YouTube.
+"""
+        }
+        module_message = module_messages.get(module, "Module tidak ditemukan.")
+        back_button = InlineKeyboardButton("Kembali", callback_data="module")
+        await callback_query.message.edit(module_message, reply_markup=InlineKeyboardMarkup([[back_button]]))
+
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
-            [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
-             InlineKeyboardButton("Bantuan", callback_data="help")],
+            [InlineKeyboardButton("Bantuan", callback_data="help"), InlineKeyboardButton("Module", callback_data="module")],
+            [InlineKeyboardButton("Ambil String", callback_data="ambil_string")],
         ]
         video_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
         caption = "Selamat datang di bot kami!"
