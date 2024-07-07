@@ -42,4 +42,4 @@ def register_handlers(app: Client):
 **How to Get Channel/Group ID:**
 Forward a message from the channel/group to this bot, or use the /id command if inside it.
 """
-        await callback_query.message.edit(help_message, parse_mode='markdown')
+        await callback_query.message.edit(help_message)
