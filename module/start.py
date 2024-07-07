@@ -2,21 +2,26 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaAnimation
 
 def register_handlers(app: Client):
-    gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
-    welcome_animation = InputMediaAnimation(media=gif_url)
-
     @app.on_message(filters.command("start"))
     async def start(client, message):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        media = InputMediaAnimation(gif_url)
+        await client.send_animation(message.chat.id, media=media)
+
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
-        await message.reply("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=message.message_id)
-        await app.send_animation(chat_id=message.chat.id, animation=welcome_animation, caption="")
+        await message.reply("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        media = InputMediaAnimation(gif_url)
+        await client.send_animation(callback_query.message.chat.id, media=media)
+
+        ask_ques = "**» Pilih Jenis String yang Ingin Dibuat **"
         buttons_ques = [
             [
                 InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 💗", callback_data="pyrogram"),
@@ -29,11 +34,17 @@ def register_handlers(app: Client):
             ],
             [InlineKeyboardButton("Kembali", callback_data="back_to_start")],
         ]
-        await callback_query.message.edit("**» Pilih Jenis String yang Ingin Dibuat **", reply_markup=InlineKeyboardMarkup(buttons_ques), reply_to_message_id=callback_query.message.reply_to_message.message_id)
+        await callback_query.message.edit(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        media = InputMediaAnimation(gif_url)
+        await client.send_animation(callback_query.message.chat.id, media=media)
+
         help_message = """
+**Daftar Perintah:**
+
 /tts <teks> - Mengubah teks menjadi suara dengan bahasa yang dipilih.
 /bahasatts - Mengatur bahasa untuk Text-to-Speech (TTS).
 /id - Menampilkan ID Anda dan ID grup (jika di grup).
@@ -50,13 +61,17 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
         back_button = InlineKeyboardButton("Kembali", callback_data="back_to_start")
-        await callback_query.message.edit(help_message, reply_markup=InlineKeyboardMarkup([[back_button]]), reply_to_message_id=callback_query.message.reply_to_message.message_id)
+        await callback_query.message.edit(help_message, reply_markup=InlineKeyboardMarkup([[back_button]]))
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
+        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
+        media = InputMediaAnimation(gif_url)
+        await client.send_animation(callback_query.message.chat.id, media=media)
+
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
-        await callback_query.message.edit("Silakan pilih opsi di bawah ini:", reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=callback_query.message.reply_to_message.message_id)
+        await callback_query.message.edit("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
