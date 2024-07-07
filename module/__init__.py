@@ -7,6 +7,7 @@ from .help import register_handlers as register_help_handlers
 from .song import register_handlers as register_song_handlers
 from .audteks import register_handlers as register_audteks_handlers
 from .namebl import register_handlers as register_namebl_handlers
+from .string import register_handlers as register_string_handlers
 
 def register_all_handlers(app):
     register_carbon_handlers(app)
@@ -18,3 +19,4 @@ def register_all_handlers(app):
     register_song_handlers(app)
     register_audteks_handlers(app)
     register_namebl_handlers(app)
+    register_string_handlers(app)
