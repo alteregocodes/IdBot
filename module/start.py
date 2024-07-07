@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaAnimation
 
 # URL untuk video GIF
 GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
@@ -46,10 +46,14 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        await callback_query.message.edit_animation(
-            animation=GIF_URL,
-            caption="Selamat datang di bot kami!",
-            reply_markup=get_main_buttons()
+        await client.edit_message_media(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            media=InputMediaAnimation(
+                media=GIF_URL,
+                caption="Selamat datang di bot kami!",
+                reply_markup=get_main_buttons()
+            )
         )
 
 def get_main_buttons():
