@@ -13,7 +13,7 @@ def register_handlers(app: Client):
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
-        ask_ques = "**☞︎︎︎ ᴄʜᴏᴏsᴇ ᴏɴᴇ ᴛʜᴀᴛ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ sᴇssɪᴏɴ 𖤍 ✔️ **"
+        ask_ques = "**» Pilih Jenis Strings Yang Mau di Generate **"
         buttons_ques = [
             [
                 InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 💗", callback_data="pyrogram"),
