@@ -4,15 +4,20 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 # URL untuk video GIF
 GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
 
+# Menyimpan ID pesan start
+start_message_id = None
+
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
-        await client.send_animation(
+        global start_message_id
+        start_message = await client.send_animation(
             chat_id=message.chat.id,
             animation=GIF_URL,
             caption="Selamat datang di bot kami!",
             reply_markup=get_main_buttons()
         )
+        start_message_id = start_message.message_id
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
@@ -44,12 +49,19 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
         buttons = InlineKeyboardMarkup([[get_back_button("back_to_start")]])
-        await callback_query.message.edit_text(help_message, reply_markup=buttons)
+        if callback_query.message.chat.id == start_message.chat.id:
+            await client.edit_message_text(callback_query.message.chat.id, start_message_id, text=help_message, reply_markup=buttons)
+        else:
+            await callback_query.message.edit_text(help_message, reply_markup=buttons)
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        await callback_query.message.delete()
-        await start(client, callback_query.message)
+        global start_message_id
+        if callback_query.message.chat.id == start_message.chat.id:
+            await client.edit_message_text(callback_query.message.chat.id, start_message_id, text="Selamat datang di bot kami!", reply_markup=get_main_buttons())
+        else:
+            await callback_query.message.delete()
+            await start(client, callback_query.message)
 
 def get_main_buttons():
     return InlineKeyboardMarkup([
