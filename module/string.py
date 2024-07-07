@@ -95,8 +95,22 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
         else:
             await client.start(bot_token=phone_number)
     except Exception as e:
-        await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
-        return
+        if 'SESSION_PASSWORD_NEEDED' in str(e):
+            password_msg = await bot.ask(user_id, "Two-step verification is enabled. Please send your **password**.", filters=filters.text)
+            if await cancelled(password_msg):
+                return
+            password = password_msg.text
+            try:
+                if telethon:
+                    await client.sign_in(phone_number, phone_code, password=password)
+                else:
+                    await client.check_password(password=password)
+            except Exception as e:
+                await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+                return
+        else:
+            await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+            return
 
     string_session = client.session.save() if telethon else await client.export_session_string()
     await client.disconnect()
