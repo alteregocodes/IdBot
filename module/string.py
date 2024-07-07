@@ -41,7 +41,7 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
         api_hash = api_hash_msg.text
 
     if not is_bot:
-        t = "Please enter your phone number to proceed:\nExample: `+91 95xxxxxxXX`"
+        t = "Please enter your phone number to proceed:\nExample: `+62 62xxxxxxXX`"
     else:
         t = "Please send your **BOT_TOKEN** to continue.\nExample: `123456789:ABCDEF...`"
     
