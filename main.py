@@ -5,7 +5,6 @@ import logging
 from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN
 from module import register_all_handlers
-from module.update import register_update_handler
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +14,6 @@ app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_T
 
 # Register all handlers including update_command
 register_all_handlers(app)
-register_update_handler(app)
 
 # Handle graceful shutdown
 def on_shutdown():
