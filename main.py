@@ -5,6 +5,7 @@ import logging
 from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN
 from module import register_all_handlers
+import module.string
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
