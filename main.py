@@ -2,10 +2,10 @@
 
 import asyncio
 import logging
-import signal
 from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN
 from module import register_all_handlers
+from module.update import register_update_handler
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +15,7 @@ app = Client("channel_id_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_T
 
 # Register all handlers including update_command
 register_all_handlers(app)
+register_update_handler(app)
 
 # Handle graceful shutdown
 def on_shutdown():
@@ -23,15 +24,6 @@ def on_shutdown():
 # Ensure shutdown message is logged
 import atexit
 atexit.register(on_shutdown)
-
-def handle_exit(signal, frame):
-    logger.info("Stop signal received. Exiting...")
-    asyncio.get_event_loop().stop()
-    app.stop()
-
-# Register signal handlers
-signal.signal(signal.SIGINT, handle_exit)
-signal.signal(signal.SIGTERM, handle_exit)
 
 if __name__ == "__main__":
     logger.info("Bot sedang dijalankan")
