@@ -24,7 +24,7 @@ def register_handlers(app: Client):
                 InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝙱𝙾𝚃 🤖", callback_data="pyrogram_bot"),
                 InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 𝙱𝙾𝚃 🤖", callback_data="telethon_bot"),
             ],
-            [InlineKeyboardButton("Kembali", callback_data="back_to_help")]
+            [InlineKeyboardButton("Kembali", callback_data="back_to_start")],
         ]
         await callback_query.message.edit(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
 
