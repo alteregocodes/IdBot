@@ -6,7 +6,6 @@ def register_handlers(app: Client):
     async def start(client, message):
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
-            [InlineKeyboardButton("Support Group", url="https://t.me/supportgroup")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string")],
         ]
         await message.reply("Welcome to the bot!", reply_markup=InlineKeyboardMarkup(buttons))
