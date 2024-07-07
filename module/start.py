@@ -4,31 +4,41 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMedi
 # URL untuk video GIF
 GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
 
+# Dictionary untuk menyimpan message_id pesan sebelumnya
+previous_messages = {}
+
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
-        # Kirim animasi dan hapus pesan sebelumnya jika ada
-        await delete_previous_message(client, message.chat.id)
-        await client.send_animation(
+        # Mengirimkan pesan pertama dengan animasi GIF
+        sent_message = await client.send_animation(
             chat_id=message.chat.id,
             animation=GIF_URL,
             caption="Selamat datang di bot kami!",
             reply_markup=get_main_buttons()
         )
+        # Menyimpan message_id pesan pertama
+        previous_messages[message.chat.id] = sent_message.message_id
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
-        # Hapus pesan sebelumnya dan edit pesan dengan pilihan jenis string
+        # Menghapus pesan sebelumnya
         await delete_previous_message(client, callback_query.message.chat.id)
-        await callback_query.message.edit_caption(
+        # Mengirimkan pesan baru dengan pilihan jenis string
+        sent_message = await client.send_animation(
+            chat_id=callback_query.message.chat.id,
+            animation=GIF_URL,
             caption="**» Pilih Jenis String yang Ingin Dibuat **",
             reply_markup=get_string_type_buttons()
         )
+        # Menyimpan message_id pesan baru
+        previous_messages[callback_query.message.chat.id] = sent_message.message_id
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
-        # Hapus pesan sebelumnya dan kirim pesan bantuan
+        # Menghapus pesan sebelumnya
         await delete_previous_message(client, callback_query.message.chat.id)
+        # Mengirimkan pesan bantuan baru
         help_message = """
 **Daftar Perintah:**
 
@@ -48,25 +58,37 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
         buttons = InlineKeyboardMarkup([[get_back_button("back_to_start")]])
-        await callback_query.edit_message_caption(caption=help_message, reply_markup=buttons)
+        sent_message = await client.send_animation(
+            chat_id=callback_query.message.chat.id,
+            animation=GIF_URL,
+            caption=help_message,
+            reply_markup=buttons
+        )
+        # Menyimpan message_id pesan bantuan baru
+        previous_messages[callback_query.message.chat.id] = sent_message.message_id
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        # Hapus pesan sebelumnya dan kirim ulang pesan start
+        # Menghapus pesan sebelumnya
         await delete_previous_message(client, callback_query.message.chat.id)
-        await client.send_animation(
+        # Mengirimkan pesan start awal kembali
+        sent_message = await client.send_animation(
             chat_id=callback_query.message.chat.id,
             animation=GIF_URL,
             caption="Selamat datang di bot kami!",
             reply_markup=get_main_buttons()
         )
+        # Menyimpan message_id pesan start awal
+        previous_messages[callback_query.message.chat.id] = sent_message.message_id
 
 async def delete_previous_message(client, chat_id):
-    # Menghapus pesan sebelumnya dari bot jika ada
-    async for message in client.iter_history(chat_id):
-        if message.from_user.is_self:
-            await message.delete()
-            break
+    # Mengambil message_id pesan sebelumnya
+    previous_message_id = previous_messages.get(chat_id)
+    if previous_message_id:
+        # Menghapus pesan sebelumnya
+        await client.delete_messages(chat_id, previous_message_id)
+        # Menghapus message_id dari dictionary
+        del previous_messages[chat_id]
 
 def get_main_buttons():
     return InlineKeyboardMarkup([
