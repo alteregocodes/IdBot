@@ -43,16 +43,12 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
-        await callback_query.message.edit(help_message, reply_markup=get_back_button())
+        await callback_query.message.edit(help_message, reply_markup=get_back_button("back_to_start"))
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        await client.send_animation(
-            chat_id=callback_query.message.chat.id,
-            animation=GIF_URL,
-            caption="Selamat datang di bot kami!",
-            reply_markup=get_main_buttons()
-        )
+        await callback_query.message.delete()
+        await start(client, callback_query.message)
 
 def get_main_buttons():
     return InlineKeyboardMarkup([
@@ -72,8 +68,8 @@ def get_string_type_buttons():
             InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝙱𝙾𝚃 🤖", callback_data="pyrogram_bot"),
             InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 𝙱𝙾𝚃 🤖", callback_data="telethon_bot"),
         ],
-        [get_back_button()]
+        [get_back_button("back_to_start")]
     ])
 
-def get_back_button():
-    return InlineKeyboardButton("Kembali", callback_data="back_to_start")
+def get_back_button(callback_data):
+    return InlineKeyboardButton("Kembali", callback_data=callback_data)
