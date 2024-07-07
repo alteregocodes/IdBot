@@ -1,26 +1,24 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaAnimation
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# URL untuk video GIF
+GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
 
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
-        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
-        media = InputMediaAnimation(gif_url)
-        await client.send_animation(message.chat.id, media=media)
-
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
         await message.reply("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
+        
+        # Kirim video GIF tanpa caption
+        await client.send_video(message.chat.id, video=GIF_URL)
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
-        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
-        media = InputMediaAnimation(gif_url)
-        await client.send_animation(callback_query.message.chat.id, media=media)
-
         ask_ques = "**» Pilih Jenis String yang Ingin Dibuat **"
         buttons_ques = [
             [
@@ -32,16 +30,14 @@ def register_handlers(app: Client):
                 InlineKeyboardButton("𝙿𝚈𝚁𝙾𝙶𝚁𝙰𝙼 𝙱𝙾𝚃 🤖", callback_data="pyrogram_bot"),
                 InlineKeyboardButton("𝚃𝙴𝙻𝙴𝚃𝙷𝙾𝙽 𝙱𝙾𝚃 🤖", callback_data="telethon_bot"),
             ],
-            [InlineKeyboardButton("Kembali", callback_data="back_to_start")],
         ]
         await callback_query.message.edit(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
+        
+        # Kirim video GIF tanpa caption
+        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
-        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
-        media = InputMediaAnimation(gif_url)
-        await client.send_animation(callback_query.message.chat.id, media=media)
-
         help_message = """
 **Daftar Perintah:**
 
@@ -63,15 +59,17 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
         back_button = InlineKeyboardButton("Kembali", callback_data="back_to_start")
         await callback_query.message.edit(help_message, reply_markup=InlineKeyboardMarkup([[back_button]]))
 
+        # Kirim video GIF tanpa caption
+        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
+
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
-        gif_url = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
-        media = InputMediaAnimation(gif_url)
-        await client.send_animation(callback_query.message.chat.id, media=media)
-
         buttons = [
             [InlineKeyboardButton("Support Channel", url="https://t.me/supportchannel")],
             [InlineKeyboardButton("Ambil String", callback_data="ambil_string"),
              InlineKeyboardButton("Bantuan", callback_data="help")],
         ]
         await callback_query.message.edit("Selamat datang di bot kami!", reply_markup=InlineKeyboardMarkup(buttons))
+        
+        # Kirim video GIF tanpa caption
+        await client.send_video(callback_query.message.chat.id, video=GIF_URL)
