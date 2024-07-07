@@ -7,6 +7,8 @@ GIF_URL = "https://telegra.ph/file/35cf8363e5b42adf1ca94.mp4"
 def register_handlers(app: Client):
     @app.on_message(filters.command("start"))
     async def start(client, message):
+        # Kirim animasi dan hapus pesan sebelumnya jika ada
+        await delete_previous_message(client, message.chat.id)
         await client.send_animation(
             chat_id=message.chat.id,
             animation=GIF_URL,
@@ -16,6 +18,8 @@ def register_handlers(app: Client):
 
     @app.on_callback_query(filters.regex("ambil_string"))
     async def handle_ambil_string(client, callback_query):
+        # Hapus pesan sebelumnya dan edit pesan dengan pilihan jenis string
+        await delete_previous_message(client, callback_query.message.chat.id)
         await callback_query.message.edit_caption(
             caption="**» Pilih Jenis String yang Ingin Dibuat **",
             reply_markup=get_string_type_buttons()
@@ -23,6 +27,8 @@ def register_handlers(app: Client):
 
     @app.on_callback_query(filters.regex("help"))
     async def handle_help(client, callback_query):
+        # Hapus pesan sebelumnya dan kirim pesan bantuan
+        await delete_previous_message(client, callback_query.message.chat.id)
         help_message = """
 **Daftar Perintah:**
 
@@ -46,12 +52,21 @@ Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
+        # Hapus pesan sebelumnya dan kirim ulang pesan start
+        await delete_previous_message(client, callback_query.message.chat.id)
         await client.send_animation(
             chat_id=callback_query.message.chat.id,
             animation=GIF_URL,
             caption="Selamat datang di bot kami!",
             reply_markup=get_main_buttons()
         )
+
+async def delete_previous_message(client, chat_id):
+    # Menghapus pesan sebelumnya dari bot jika ada
+    async for message in client.iter_history(chat_id):
+        if message.from_user.is_self:
+            await message.delete()
+            break
 
 def get_main_buttons():
     return InlineKeyboardMarkup([
