@@ -42,7 +42,7 @@ Untuk mendapatkan string session Telegram Anda, Anda perlu membuatnya menggunaka
 Klik tombol "Kembali" untuk kembali ke pesan sebelumnya.
 """
         buttons = InlineKeyboardMarkup([[get_back_button("back_to_start")]])
-        await callback_query.message.edit_caption(caption=help_message, reply_markup=buttons)
+        await callback_query.edit_message_caption(caption=help_message, reply_markup=buttons)
 
     @app.on_callback_query(filters.regex("back_to_start"))
     async def handle_back_to_start(client, callback_query):
