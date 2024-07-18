@@ -9,6 +9,7 @@ from .audteks import register_handlers as register_audteks_handlers
 from .namebl import register_handlers as register_namebl_handlers
 from .string import register_handlers as register_string_handlers
 from .update import register_update_handler  # Mengimpor register_update_handler dari module/update.py
+from .dev import register_handlers as register_dev_handlers  # Mengimpor register_handlers dari module/dev.py
 
 def register_all_handlers(app):
     register_carbon_handlers(app)
@@ -22,3 +23,4 @@ def register_all_handlers(app):
     register_namebl_handlers(app)
     register_string_handlers(app)
     register_update_handler(app)
+    register_dev_handlers(app)  # Mendaftarkan handler dari dev.py
