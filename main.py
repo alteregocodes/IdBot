@@ -8,8 +8,7 @@ from module import register_all_handlers
 from module import *
 
 # Register handlers
-string.register_handlers(app)
-dev.register_handlers(app)
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
