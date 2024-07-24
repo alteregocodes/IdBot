@@ -1,3 +1,4 @@
+orjson
 aiohttp
 pyrogram
 gtts
@@ -8,3 +9,5 @@ yt-dlp
 youtube_dl
 pydub
 SpeechRecognition
+lxml
+bs4
