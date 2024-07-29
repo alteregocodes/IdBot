@@ -1,9 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from telethon import TelegramClient
-from telethon.sessions import StringSession
 from pyrogram.errors import ApiIdInvalid, PhoneNumberInvalid, PhoneCodeInvalid, PhoneCodeExpired, SessionPasswordNeeded, PasswordHashInvalid
-from telethon.errors import ApiIdInvalidError, PhoneNumberInvalidError, PhoneCodeInvalidError, PhoneCodeExpiredError, SessionPasswordNeededError, PasswordHashInvalidError
 from asyncio.exceptions import TimeoutError
 import config
 
@@ -21,18 +18,18 @@ gen_button = [
 # Dictionary to keep track of user state
 user_states = {}
 
-@Client.on_message(filters.private & ~filters.forwarded & filters.command(["generate", "gen", "string", "str"]))
+@app.on_message(filters.private & ~filters.forwarded & filters.command(["generate", "gen", "string", "str"]))
 async def main(client: Client, msg: Message):
     await msg.reply(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
 
-@Client.on_callback_query(filters.regex("pyrogram|pyrogram_v2|telethon|telethon_bot|pyrogram_bot"))
+@app.on_callback_query(filters.regex("pyrogram|pyrogram_v2|telethon|telethon_bot|pyrogram_bot"))
 async def handle_callback_query(client: Client, callback_query):
     callback_data = callback_query.data
     user_id = callback_query.from_user.id
     user_states[user_id] = {"step": "api_id", "session_type": callback_data}
     await callback_query.message.edit("» Starting session generation...\nPlease send your **API_ID**.")
 
-@Client.on_message(filters.text & filters.private)
+@app.on_message(filters.text & filters.private)
 async def handle_input(client: Client, message: Message):
     user_id = message.from_user.id
     state = user_states.get(user_id)
@@ -73,12 +70,9 @@ async def handle_input(client: Client, message: Message):
             await message.reply(text)
             user_states.pop(user_id)  # Clean up the user state after completion
 
-@Client.on_message(filters.text & filters.private)
-async def handle_cancellations(message: Message):
-    user_id = message.from_user.id
-    if "/cancel" in message.text or "/restart" in message.text or message.text.startswith("/"):
-        await message.reply("**» Cancellation of ongoing string generation process!**", reply_markup=InlineKeyboardMarkup(gen_button))
-        user_states.pop(user_id, None)
+        elif "/cancel" in message.text or "/restart" in message.text or message.text.startswith("/"):
+            await message.reply("**» Cancellation of ongoing string generation process!**", reply_markup=InlineKeyboardMarkup(gen_button))
+            user_states.pop(user_id, None)
 
 app = Client("my_bot", api_id=config.API_ID, api_hash=config.API_HASH)
 
