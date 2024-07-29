@@ -2,6 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import ApiIdInvalid, PhoneNumberInvalid, PhoneCodeInvalid, PhoneCodeExpired, SessionPasswordNeeded, PasswordHashInvalid
 from asyncio.exceptions import TimeoutError
+
+# Tidak perlu mengimpor dari Telethon jika tidak digunakan
 import config
 
 ask_ques = "**☞︎︎︎ ᴄʜᴏᴏsᴇ ᴏɴᴇ ᴛʜᴀᴛ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ sᴇssɪᴏɴ 𖤍 ✔️ **"
@@ -18,63 +20,59 @@ gen_button = [
 # Dictionary to keep track of user state
 user_states = {}
 
-@app.on_message(filters.private & ~filters.forwarded & filters.command(["generate", "gen", "string", "str"]))
-async def main(client: Client, msg: Message):
-    await msg.reply(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
+def register_handlers(app: Client):
+    @app.on_message(filters.private & ~filters.forwarded & filters.command(["generate", "gen", "string", "str"]))
+    async def main(client: Client, msg: Message):
+        await msg.reply(ask_ques, reply_markup=InlineKeyboardMarkup(buttons_ques))
 
-@app.on_callback_query(filters.regex("pyrogram|pyrogram_v2|telethon|telethon_bot|pyrogram_bot"))
-async def handle_callback_query(client: Client, callback_query):
-    callback_data = callback_query.data
-    user_id = callback_query.from_user.id
-    user_states[user_id] = {"step": "api_id", "session_type": callback_data}
-    await callback_query.message.edit("» Starting session generation...\nPlease send your **API_ID**.")
+    @app.on_callback_query(filters.regex("pyrogram|pyrogram_v2|telethon|telethon_bot|pyrogram_bot"))
+    async def handle_callback_query(client: Client, callback_query):
+        callback_data = callback_query.data
+        user_id = callback_query.from_user.id
+        user_states[user_id] = {"step": "api_id", "session_type": callback_data}
+        await callback_query.message.edit("» Starting session generation...\nPlease send your **API_ID**.")
 
-@app.on_message(filters.text & filters.private)
-async def handle_input(client: Client, message: Message):
-    user_id = message.from_user.id
-    state = user_states.get(user_id)
+    @app.on_message(filters.text & filters.private)
+    async def handle_input(client: Client, message: Message):
+        user_id = message.from_user.id
+        state = user_states.get(user_id)
 
-    if state:
-        if state["step"] == "api_id":
-            api_id = message.text
-            if api_id.isdigit():
-                user_states[user_id]["api_id"] = int(api_id)
-                user_states[user_id]["step"] = "api_hash"
-                await message.reply("Please send your **API_HASH**.")
-            else:
-                await message.reply("**API_ID** must be an integer. Please try again.")
+        if state:
+            if state["step"] == "api_id":
+                api_id = message.text
+                if api_id.isdigit():
+                    user_states[user_id]["api_id"] = int(api_id)
+                    user_states[user_id]["step"] = "api_hash"
+                    await message.reply("Please send your **API_HASH**.")
+                else:
+                    await message.reply("**API_ID** must be an integer. Please try again.")
 
-        elif state["step"] == "api_hash":
-            api_hash = message.text
-            user_states[user_id]["api_hash"] = api_hash
-            user_states[user_id]["step"] = "phone_number"
-            
-            is_bot = "bot" in state["session_type"]
-            prompt = "Please enter your phone number to proceed:\nExample: `+62 62xxxxxxXX`" if not is_bot else "Please send your **BOT_TOKEN** to continue."
-            await message.reply(prompt)
+            elif state["step"] == "api_hash":
+                api_hash = message.text
+                user_states[user_id]["api_hash"] = api_hash
+                user_states[user_id]["step"] = "phone_number"
+                
+                is_bot = "bot" in state["session_type"]
+                prompt = "Please enter your phone number to proceed:\nExample: `+62 62xxxxxxXX`" if not is_bot else "Please send your **BOT_TOKEN** to continue."
+                await message.reply(prompt)
 
-        elif state["step"] == "phone_number":
-            phone_number = message.text
-            user_states[user_id]["phone_number"] = phone_number
-            user_states[user_id]["step"] = "otp"
-            
-            await message.reply("Trying to send OTP to the given number...")
-            # Proceed with OTP request and verification here
+            elif state["step"] == "phone_number":
+                phone_number = message.text
+                user_states[user_id]["phone_number"] = phone_number
+                user_states[user_id]["step"] = "otp"
+                
+                await message.reply("Trying to send OTP to the given number...")
+                # Proceed with OTP request and verification here
 
-        elif state["step"] == "otp":
-            otp_code = message.text
-            # Handle OTP verification and session generation here
-            # After successful generation
-            string_session = "GeneratedStringSessionHere"  # Replace with actual session generation logic
-            text = f"**This is your string session** \n\n`{string_session}` \n\n**Generated by : [𝗗𝗔𝗫𝗫](https://t.me/YourExDestiny) WARNING :** Don't share with anyone even if with you 🏴‍☠️"
-            await message.reply(text)
-            user_states.pop(user_id)  # Clean up the user state after completion
+            elif state["step"] == "otp":
+                otp_code = message.text
+                # Handle OTP verification and session generation here
+                # After successful generation
+                string_session = "GeneratedStringSessionHere"  # Replace with actual session generation logic
+                text = f"**This is your string session** \n\n`{string_session}` \n\n**Generated by : [𝗗𝗔𝗫𝗫](https://t.me/YourExDestiny) WARNING :** Don't share with anyone even if with you 🏴‍☠️"
+                await message.reply(text)
+                user_states.pop(user_id)  # Clean up the user state after completion
 
-        elif "/cancel" in message.text or "/restart" in message.text or message.text.startswith("/"):
-            await message.reply("**» Cancellation of ongoing string generation process!**", reply_markup=InlineKeyboardMarkup(gen_button))
-            user_states.pop(user_id, None)
-
-app = Client("my_bot", api_id=config.API_ID, api_hash=config.API_HASH)
-
-# Jalankan aplikasi
-app.run()
+            elif "/cancel" in message.text or "/restart" in message.text or message.text.startswith("/"):
+                await message.reply("**» Cancellation of ongoing string generation process!**", reply_markup=InlineKeyboardMarkup(gen_button))
+                user_states.pop(user_id, None)
