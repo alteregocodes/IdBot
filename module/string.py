@@ -1,99 +1,77 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from pyrogram.errors import FloodWait
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from telethon import TelegramClient
+from telethon.sessions import StringSession
 from pymongo import MongoClient
 import config
 
 # Initialize database connection
-client = MongoClient(config.MONGO_URI)
-db = client[config.DB_NAME]
+mongo_client = MongoClient(config.MONGO_URI)
+db = mongo_client[config.DB_NAME]
 user_sessions = db["user_sessions"]
 
-# State storage for tracking user state
-user_states = {}
+user_states = {}  # Dictionary to keep track of user states
 
 def register_handlers(app: Client):
     @app.on_callback_query(filters.regex("pyrogram|pyrogram_v2|telethon|pyrogram_bot|telethon_bot"))
     async def generate_session(client, callback_query):
         callback_data = callback_query.data
-        await callback_query.message.edit("» Trying to start **{}** session generator...".format(callback_data.upper()))
+        user_id = callback_query.from_user.id
+        user_states[user_id] = {"step": "api_id", "session_type": callback_data}
 
-        # Start generating session based on the selected type
-        await generate_session_logic(client, callback_query.message, callback_data)
+        await callback_query.message.edit("» Starting session generation...\nPlease send your **API_ID**.")
+    
+    @app.on_message(filters.text & filters.private)
+    async def handle_input(client, message: Message):
+        user_id = message.from_user.id
+        state = user_states.get(user_id)
 
-    @app.on_message(filters.text)
-    async def handle_user_input(client, message: Message):
-        user_id = message.chat.id
-        if user_id in user_states:
-            state = user_states[user_id]
-            if state["waiting_for"] == "api_id":
-                await handle_api_id(client, message, user_id)
-            elif state["waiting_for"] == "api_hash":
-                await handle_api_hash(client, message, user_id)
-            elif state["waiting_for"] == "phone_number":
-                await handle_phone_number(client, message, user_id)
-            elif state["waiting_for"] == "otp":
-                await handle_otp(client, message, user_id)
-            elif state["waiting_for"] == "password":
-                await handle_password(client, message, user_id)
+        if state:
+            step = state["step"]
+            if step == "api_id":
+                api_id = message.text
+                if api_id.isdigit():
+                    state["api_id"] = int(api_id)
+                    state["step"] = "api_hash"
+                    await message.reply("Please send your **API_HASH**.")
+                else:
+                    await message.reply("**API_ID** must be an integer. Please try again.")
+                    
+            elif step == "api_hash":
+                api_hash = message.text
+                state["api_hash"] = api_hash
+                state["step"] = "phone_number"
+                
+                is_bot = "bot" in state["session_type"]
+                prompt = "Please enter your phone number to proceed:\nExample: `+62 62xxxxxxXX`" if not is_bot else "Please send your **BOT_TOKEN** to continue."
+                await message.reply(prompt)
 
-async def handle_api_id(client: Client, message: Message, user_id: int):
-    api_id = message.text
-    if api_id == "/skip":
-        api_id = config.API_ID
-        api_hash = config.API_HASH
-        user_states[user_id]["api_id"] = api_id
-        user_states[user_id]["api_hash"] = api_hash
-        await client.send_message(user_id, "Please send your **API_HASH** to continue.")
-        user_states[user_id]["waiting_for"] = "api_hash"
-    else:
-        try:
-            api_id = int(api_id)
-            user_states[user_id]["api_id"] = api_id
-            await client.send_message(user_id, "Please send your **API_HASH** to continue.")
-            user_states[user_id]["waiting_for"] = "api_hash"
-        except ValueError:
-            await client.send_message(user_id, "**API_ID** must be an integer. Please try again.")
-            return
+            elif step == "phone_number":
+                phone_number = message.text
+                state["phone_number"] = phone_number
+                state["step"] = "otp"
+                
+                await message.reply("Trying to send OTP to the given number...")
+                # Handle OTP request and verification here
 
-async def handle_api_hash(client: Client, message: Message, user_id: int):
-    api_hash = message.text
-    user_states[user_id]["api_hash"] = api_hash
-    await client.send_message(user_id, "Please send your phone number to proceed:\nExample: `+62 62xxxxxxXX`.")
-    user_states[user_id]["waiting_for"] = "phone_number"
+            elif step == "otp":
+                otp_code = message.text
+                # Handle OTP verification and session generation here
 
-async def handle_phone_number(client: Client, message: Message, user_id: int):
-    phone_number = message.text
-    user_states[user_id]["phone_number"] = phone_number
-    await client.send_message(user_id, "Please send the **OTP** you received from Telegram on your account.\nIf OTP is `12345`, please send it as `1 2 3 4 5`.")
-    user_states[user_id]["waiting_for"] = "otp"
+                # After successful generation
+                user_sessions.insert_one({
+                    "user_id": user_id,
+                    "api_id": state["api_id"],
+                    "api_hash": state["api_hash"],
+                    "phone_number": state["phone_number"],
+                    "string_session": "GeneratedStringSessionHere",
+                    "session_type": state["session_type"]
+                })
+                
+                await message.reply("Session generated successfully! Here's your string session.")
+                user_states.pop(user_id)  # Clean up the user state after completion
 
-async def handle_otp(client: Client, message: Message, user_id: int):
-    otp = message.text.replace(" ", "")
-    user_states[user_id]["otp"] = otp
-    # Proceed with logging in, etc.
-    # Once done, you can clear the state
-    user_states.pop(user_id, None)
-
-async def handle_password(client: Client, message: Message, user_id: int):
-    password = message.text
-    user_states[user_id]["password"] = password
-    # Proceed with password handling, etc.
-    # Once done, you can clear the state
-    user_states.pop(user_id, None)
-
-async def generate_session_logic(bot: Client, msg: Message, session_type: str):
-    telethon = "telethon" in session_type
-    is_bot = "bot" in session_type
-    old_pyro = session_type == "pyrogram"
-
-    user_id = msg.chat.id
-
-    user_states[user_id] = {"waiting_for": "api_id"}
-
-    await bot.send_message(user_id, "Please send your **API_ID** to proceed.\nClick /skip for using bot API.")
-
-# Start the Pyrogram client and register handlers
+# Initialize the bot
 app = Client("my_bot")
 register_handlers(app)
 app.run()
