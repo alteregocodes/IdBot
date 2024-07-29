@@ -112,7 +112,7 @@ async def generate_session(bot: Client, msg: Message, telethon=False, old_pyro: 
                     if await cancelled(code):
                         return
                     await client.sign_in(phone_number, code.text)
-                await msg.reply(f"**💾 𝖲𝙴𝒮𝒮𝒾𝒪𝒩 𝚲𝚨𝚦𝙰𝚃𝙸𝙾𝙽 𝙷𝒶𝓈 𝒷𝑒𝑒𝓃 𝒸𝒽𝑒𝒸𝓀𝑒𝒹 💾**\n\n**𝑆𝑒𝓈𝓈𝒾𝑜𝓃** : `{client.session.save()}`", quote=True, reply_markup=InlineKeyboardMarkup(gen_button))
+                await msg.reply(f"**💾 𝖲𝙴𝒮𝒮𝒾𝒪𝒩 𝚲𝚨𝚦𝙰𝚻𝙸𝙾𝙽 𝙷𝒶𝓈 𝒷𝑒𝑒𝓃 𝒸𝒽𝑒𝒸𝓀𝑒𝒹 💾**\n\n**𝑆𝑒𝓈𝓈𝒾𝑜𝓃** : `{client.session.save()}`", quote=True, reply_markup=InlineKeyboardMarkup(gen_button))
             else:
                 await client.start(phone_number)
                 await msg.reply(f"**💾 𝖲𝙴𝒮𝒮𝒾𝒪𝒩 𝚲𝚨𝚦𝙰𝚳𝙸𝙾𝙽 𝙷𝒶𝓈 𝒷𝑒𝑒𝓃 𝒸𝒽𝑒𝒸𝓀𝑒𝒹 💾**\n\n**𝑆𝑒𝓈𝓈𝒾𝑜𝓃** : `{client.session_str}`", quote=True, reply_markup=InlineKeyboardMarkup(gen_button))
@@ -123,35 +123,31 @@ async def generate_session(bot: Client, msg: Message, telethon=False, old_pyro: 
         await msg.reply(f"**𝖠𝖯𝖨 𝙸𝙳 𝙸𝙽𝙑𝖠𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ʏᴏᴜʳ ᵃᵖⁱ_ⁱᵈ ᵃɢᵃɪɴ. **", quote=True)
         logger.error(f"ApiIdInvalidError: {e}")
     except PhoneNumberInvalidError as e:
-        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙽𝓊𝓂𝒷𝑒ʳ 𝙸𝙽𝙵𝙰𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ʏᴏᴜʳ 𝒸𝑜𝓃𝓉𝒶𝒸𝓉 𝓃𝓊𝓂𝒷𝑒𝓇 ᵉxᵐᵖˡ𝑒 `+91 95xxxxxxXX`", quote=True)
+        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙽𝓊𝓂𝒷𝑒ʳ 𝙸𝙽𝙵𝙰𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ʏᴏᴜʳ 𝒸𝑜𝓃𝓉𝒶𝒸𝓉 𝓃𝓊𝓂𝒷𝑒𝓇 ᵉxᵐᵏˣᵈ`+91 95xxxxxxXX`", quote=True)
         logger.error(f"PhoneNumberInvalidError: {e}")
     except PhoneCodeInvalidError as e:
-        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙲𝑜𝒹𝑒 𝙸𝙽𝙵𝒶𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ʏᴏᴜʳ 𝑐𝑜𝒹𝑒 ᴀɢᴀɪɴ.", quote=True)
+        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙲𝑜𝒹𝑒 𝙸𝙽𝙵𝒶𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 𝓉ʜᴇ ᴄᴏᴅᴇ ʏᴏᴜ ʀᴇᴄᴇɪᴋᴇᴅ.", quote=True)
         logger.error(f"PhoneCodeInvalidError: {e}")
     except PhoneCodeExpiredError as e:
-        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙲𝑜𝒹𝑒 𝙴𝚇𝙿𝙸𝚁𝙴𝙳**\n\n𝙻𝙴𝒶𝓈𝑒 ᴅᴜʀɪɴɢ ᴛᴇsᴛᴄᴏᴅᴇ ᴡɪᴛʜᴏᴜᴛ ᴅᴇʟᵁɢᴇ. ᴀʀʟᴇᵂ ᴀɪᴍ ᵃɢᴀɪɴ.", quote=True)
+        await msg.reply(f"**𝙿𝚑𝑜𝓃𝑒 𝙲𝑜𝒹𝑒 𝙴𝚇𝙿𝙸𝚁𝙴𝙳**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 𝒸ᴏᴅᴇ ʏᴏᴜ ʀᴇᴄᴇɪᴋᴇᴅ ᴘʀᴇᴠɪᴏᴜ𝒹ʹɬ𝑒𝒶𝓈ᴇ ᴜsᴇ ᵃ 𝓃𝑒𝓌 ᴄᴏᴅᴇ.", quote=True)
         logger.error(f"PhoneCodeExpiredError: {e}")
     except SessionPasswordNeededError as e:
-        await msg.reply(f"**𝙿𝒶𝒮𝒮𝒲𝒪𝒭𝒹 𝙽𝒺𝐸𝒹𝐸𝒟**\n\n𝙻𝙴𝒶𝓈𝑒 𝓈ᴇ𝓃ᴅ 𝓎ᴏᴜʿ𝓈 𝓉ᴏ𝒯𝒶𝒷 ᴅᴜʀɪɴɢ 𝓉ʜᴇ ᴏᴛᴴᴇ𝒶𝓃 ᴇxᵃᴍᴩʟ𝑒 {str(e)}", quote=True)
+        await msg.reply(f"**𝑆ᴇ𝓈𝓈𝒾𝒪𝒩 𝒫𝒶𝒮𝒮𝒲𝒪𝑅𝒹 𝒩𝐸𝐸𝒹𝐸𝒟**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ᴏʀ 𝒸ʜ𝒶𝓃𝑔𝑒 ʏᴏᴜ𝓇 𝑒𝓈𝓈𝑒𝓃𝓉𝒾𝒶𝓁 𝓅𝒶𝓈𝓈𝓌𝑜𝓇𝒹.", quote=True)
         logger.error(f"SessionPasswordNeededError: {e}")
     except PasswordHashInvalidError as e:
-        await msg.reply(f"**𝙿𝒶𝒮𝒮𝒲𝒪𝒭𝒹 𝙷𝒶𝒮𝒽 𝙸𝙽𝙵𝒶𝙻𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 ᴘʀᴏᴄᴇss ᴄ𝑜𝓂𝒹 ʀ𝒾𝓉𝑒.", quote=True)
+        await msg.reply(f"**𝒫𝒶𝓈𝓈𝒲𝒪𝑅𝒹 𝒷𝒶𝓈𝒾𝒸 𝓇𝒾𝒸𝒽 𝑩𝑽𝒜𝑳𝙸𝒹**\n\n𝙻𝙴𝒶𝓈𝑒 𝒸𝒽𝑒𝒸𝓀 𝒸ᴏᴅᴇ ʏᴏᴜ ʀᴇᴄᴇɪᴋᴇᴅ ᴍᵉ𝑒 𝒱𝒶𝓁𝒾𝒹", quote=True)
         logger.error(f"PasswordHashInvalidError: {e}")
-    except TimeoutError as e:
-        await msg.reply("**𝑇𝒾𝑀𝒪𝑈𝒯**\n\n𝙻𝙴𝒶𝓈𝑒 𝓇ᴇ𝒸ᴇ𝒾𝓋𝑒 𝑒𝓇𝓇𝑜𝓇 ᵒʳ 𝒾𝓃𝓁𝒾𝓃𝑒 𝓉𝑒𝓍𝓉 𝒷𝒶𝒸𝓀 ᵍᵒ 𝒸𝒾𝓇𝒸𝓁𝒾𝒻 𝓌𝒾𝓉ʜ 𝒾𝓃 𝑒𝓍 ᴠ𝒾𝒹𝑒 𝒾𝒹.", quote=True)
-        logger.error(f"TimeoutError: {e}")
     except Exception as e:
-        await msg.reply("**𝑆ᴏᴍᴇ𝓉ʜ𝒾𝓃𝑔 𝒲𝑅𝒪𝒩𝒢**\n\n𝒸ʷ𝑒 𝓈ᴜʟ𝑙 𝒸ᵉʀ𝒸 𝑒xᵃᴍᵈ ᵃɢᵒ 𝓈𝑒𝓂 𝒷ᵘ𝑇𝓉𝒶𝒽𝓁ᵌ𝒾𝓉𝑒.", quote=True)
+        await msg.reply(f"**𝑀𝒾𝒮𝒯𝒶𝒦𝒺**\n\n𝑈𝓃𝒶𝒷𝓁𝑒 𝒸𝑜𝓂𝓅𝓁𝑒𝓉𝑒 𝓉ʜᴇ ʳᴇ𝒿𝑒𝒸𝓉. 𝒻ʟ𝒾𝑒𝓃𝒹. 𝒯𝒾𝓂𝑒.\n𝑒𝓇𝓇𝑜𝓇: {e}", quote=True)
         logger.error(f"Exception: {e}")
 
-async def cancelled(message):
-    return message.text == "/cancel"
+async def cancelled(msg):
+    if msg.text == "/cancel":
+        await msg.reply("**🚫 ᴏᴘᴇʀᵃ𝓉𝒾𝑜𝓃 𝒸𝒶𝓃𝒸𝑒𝒹 🚫**")
+        return True
+    return False
 
-if __name__ == "__main__":
-    import asyncio
-    from config import API_ID, API_HASH
-
-    logging.basicConfig(level=logging.INFO)
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_telegram_bot())
-    loop.run_forever()
+# Add this function if it is needed
+def register_handlers(client: Client):
+    client.add_handler(main)
+    client.add_handler(generate_session)
