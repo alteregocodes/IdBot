@@ -80,5 +80,7 @@ async def handle_cancellations(message: Message):
         await message.reply("**» Cancellation of ongoing string generation process!**", reply_markup=InlineKeyboardMarkup(gen_button))
         user_states.pop(user_id, None)
 
-app = Client("my_bot")
+app = Client("my_bot", api_id=config.API_ID, api_hash=config.API_HASH)
+
+# Jalankan aplikasi
 app.run()
