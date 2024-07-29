@@ -5,6 +5,7 @@ from pyrogram import Client as PyroClient
 from telethon.sessions import StringSession
 from asyncio.exceptions import TimeoutError
 from pymongo import MongoClient
+import asyncio
 
 import config
 
@@ -43,7 +44,7 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
         try:
             api_id = int(api_id_msg.text)
         except ValueError:
-            await api_id_msg.reply("**API_ID** must be an integer. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+            await bot.send_message(user_id, "**API_ID** must be an integer. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
             return
         api_hash_msg = await ask(bot, user_id, "Please send your **API_HASH** to continue.")
         if await cancelled(api_hash_msg):
@@ -61,9 +62,9 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
     phone_number = phone_number_msg.text
 
     if not is_bot:
-        await msg.reply("Trying to send OTP to the given number...")
+        await bot.send_message(user_id, "Trying to send OTP to the given number...")
     else:
-        await msg.reply("Trying to login via bot token...")
+        await bot.send_message(user_id, "Trying to login via bot token...")
 
     client = None
     if telethon and is_bot:
@@ -86,7 +87,7 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
             else:
                 code = await client.send_code(phone_number)
     except Exception as e:
-        await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+        await bot.send_message(user_id, f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
         return
 
     phone_code_msg = None
@@ -116,10 +117,10 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
                 else:
                     await client.check_password(password=password)
             except Exception as e:
-                await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+                await bot.send_message(user_id, f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
                 return
         else:
-            await msg.reply(f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
+            await bot.send_message(user_id, f"Error: {str(e)}. Start generating your session again.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Generate Session", callback_data="generate")]]))
             return
 
     string_session = client.session.save() if telethon else await client.export_session_string()
@@ -143,8 +144,16 @@ async def generate_session_logic(bot: Client, msg: Message, session_type: str):
 
 async def ask(bot: Client, user_id: int, text: str, timeout: int = 60):
     await bot.send_message(user_id, text)
-    response = await bot.listen(user_id, timeout=timeout)
-    return response
+    
+    def check(m: Message):
+        return m.chat.id == user_id and m.text is not None
+
+    try:
+        response = await bot.listen(user_id, filters=filters.create(check), timeout=timeout)
+        return response
+    except asyncio.TimeoutError:
+        await bot.send_message(user_id, "Request timed out. Please try again.")
+        return None
 
 async def cancelled(msg):
     if "/cancel" in msg.text:
